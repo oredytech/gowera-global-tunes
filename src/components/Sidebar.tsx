@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Radio, Globe, Music, Languages, Heart, Search, Menu, X } from 'lucide-react';
+import { Home, Radio, Globe, Music, Languages, Heart, Search } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface NavItemProps {
   to: string;
@@ -52,11 +51,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
 
   const renderNavItems = () => (
     <>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold px-4 mb-1 font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">GOWERA</h1>
+      <div className="mb-8 md:block hidden">
+        <h1 className="text-2xl font-bold px-4 mb-1 font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
+          GOWERA
+        </h1>
         <p className="text-xs text-muted-foreground px-4">Les voix du monde</p>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1 md:block hidden">
         {navItems.map((item) => (
           <NavItem
             key={item.to}
@@ -67,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           />
         ))}
       </div>
-      <div className="mt-auto pt-4 px-4">
+      <div className="mt-auto pt-4 px-4 md:block hidden">
         <Button
           variant="outline"
           className="w-full justify-start"
@@ -76,35 +77,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           {theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'}
         </Button>
       </div>
+
+      {/* Mobile Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t flex justify-around items-center px-2 py-1">
+        {navItems.map((item) => (
+          <Link 
+            key={item.to} 
+            to={item.to} 
+            className={`flex flex-col items-center p-2 rounded-lg ${
+              item.isActive 
+                ? 'text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <div className="w-5 h-5">{item.icon}</div>
+            <span className="text-xs mt-1">{item.label}</span>
+          </Link>
+        ))}
+      </div>
     </>
   );
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex md:w-64 flex-col h-screen border-r p-4 ${className}`}>
-        {renderNavItems()}
-      </aside>
-      
-      {/* Mobile Sidebar (Sheet/Drawer) */}
-      <div className="md:hidden flex items-center p-4">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] sm:w-[350px]">
-            <div className="flex flex-col h-full py-4">
-              {renderNavItems()}
-            </div>
-          </SheetContent>
-        </Sheet>
-        
-        <div className="mx-auto">
-          <h1 className="text-xl font-bold font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">GOWERA</h1>
-        </div>
-      </div>
-    </>
+    <aside className={`hidden md:flex md:w-64 flex-col h-screen border-r p-4 ${className}`}>
+      {renderNavItems()}
+    </aside>
   );
 };
+
