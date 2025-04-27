@@ -78,8 +78,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         </Button>
       </div>
 
-      {/* Mobile Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t flex justify-around items-center px-2 py-1">
+      {/* Mobile Navigation Bar - Fixed at bottom */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t flex justify-around items-center px-2 py-1 z-50">
         {navItems.map((item) => (
           <Link 
             key={item.to} 
