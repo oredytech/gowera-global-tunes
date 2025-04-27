@@ -26,11 +26,11 @@ const FavoritesPage = () => {
       // Filter out null results
       return results.filter(station => station !== null) as RadioStation[];
     },
-    onSettled: () => setIsLoading(false),
   });
   
   useEffect(() => {
     setFavoriteStations(stations);
+    setIsLoading(false);
   }, [stations]);
 
   return (
