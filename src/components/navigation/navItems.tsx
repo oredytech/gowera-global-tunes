@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Home, Radio, Globe, Music, Languages, Heart, Search } from 'lucide-react';
 
 export const getNavItems = (isActive: (path: string) => boolean) => [
