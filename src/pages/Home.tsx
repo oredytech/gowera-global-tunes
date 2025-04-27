@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPopularStations, getTrendingStations, getRandomStations } from '../services/radioApi';
@@ -7,25 +6,29 @@ import { StationGrid } from '../components/StationGrid';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
-
 const Home = () => {
   const audioPlayer = useAudioPlayer();
-  
-  const { data: popularStations, isLoading: loadingPopular } = useQuery({
+  const {
+    data: popularStations,
+    isLoading: loadingPopular
+  } = useQuery({
     queryKey: ['popularStations'],
-    queryFn: () => getPopularStations(),
+    queryFn: () => getPopularStations()
   });
-  
-  const { data: trendingStations, isLoading: loadingTrending } = useQuery({
+  const {
+    data: trendingStations,
+    isLoading: loadingTrending
+  } = useQuery({
     queryKey: ['trendingStations'],
-    queryFn: () => getTrendingStations(),
+    queryFn: () => getTrendingStations()
   });
-  
-  const { data: randomStations, isLoading: loadingRandom } = useQuery({
+  const {
+    data: randomStations,
+    isLoading: loadingRandom
+  } = useQuery({
     queryKey: ['randomStations'],
-    queryFn: () => getRandomStations(5),
+    queryFn: () => getRandomStations(5)
   });
-  
   const playRandomStation = () => {
     if (randomStations && randomStations.length > 0) {
       const randomIndex = Math.floor(Math.random() * randomStations.length);
@@ -33,10 +36,8 @@ const Home = () => {
       audioPlayer.playStation(station);
     }
   };
-  
-  return (
-    <div className="space-y-10">
-      <div className="py-10 px-4 text-center">
+  return <div className="space-y-10 mx-0">
+      <div className="py-10 px-4 text-center mx-0">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-poppins mb-4 animate-fade-in">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue via-gowera-purple to-gowera-green">
             Le monde vibre à vos oreilles
@@ -51,42 +52,20 @@ const Home = () => {
         </Button>
       </div>
       
-      <section>
-        <SectionHeader 
-          title="Tendances" 
-          description="Les stations les plus écoutées en ce moment" 
-          link="/popular"
-        />
-        <StationGrid 
-          stations={trendingStations?.slice(0, 10) || []} 
-          isLoading={loadingTrending} 
-        />
+      <section className="mx-0">
+        <SectionHeader title="Tendances" description="Les stations les plus écoutées en ce moment" link="/popular" />
+        <StationGrid stations={trendingStations?.slice(0, 10) || []} isLoading={loadingTrending} />
       </section>
       
       <section>
-        <SectionHeader 
-          title="Populaires" 
-          description="Les stations les mieux notées" 
-          link="/popular"
-        />
-        <StationGrid 
-          stations={popularStations?.slice(0, 10) || []} 
-          isLoading={loadingPopular} 
-        />
+        <SectionHeader title="Populaires" description="Les stations les mieux notées" link="/popular" />
+        <StationGrid stations={popularStations?.slice(0, 10) || []} isLoading={loadingPopular} />
       </section>
       
       <section>
-        <SectionHeader 
-          title="Découvrir" 
-          description="Essayez quelque chose de nouveau" 
-        />
-        <StationGrid 
-          stations={randomStations || []} 
-          isLoading={loadingRandom} 
-        />
+        <SectionHeader title="Découvrir" description="Essayez quelque chose de nouveau" />
+        <StationGrid stations={randomStations || []} isLoading={loadingRandom} />
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Home;
