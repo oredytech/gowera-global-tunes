@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/button';
 import { Moon, Sun } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   const { theme, toggleTheme } = useTheme();
@@ -10,21 +12,21 @@ export const Footer = () => {
     <footer className="w-full border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mb-20">
       <div className="container flex flex-col gap-6 py-6 md:py-8">
         <nav className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             À propos
-          </a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          </Link>
+          <Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Contact
-          </a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          </Link>
+          <Link to="/suggest-radio" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Suggérer une radio
-          </a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          </Link>
+          <Link to="/history" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Historique
-          </a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          </Link>
+          <Link to="/advertising" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Espace pub
-          </a>
+          </Link>
           <Button 
             variant="ghost" 
             size="sm" 

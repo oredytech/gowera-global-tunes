@@ -17,6 +17,11 @@ import LanguagesPage from "./pages/LanguagesPage";
 import SearchPage from "./pages/SearchPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import NotFound from "./pages/NotFound";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import SuggestRadioPage from "./pages/SuggestRadioPage";
+import HistoryPage from "./pages/HistoryPage";
+import AdvertisingPage from "./pages/AdvertisingPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +49,11 @@ const App = () => (
                 <Route path="/languages" element={<LanguagesPage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/suggest-radio" element={<SuggestRadioPage />} />
+                <Route path="/history" element={<HistoryPage />} />
+                <Route path="/advertising" element={<AdvertisingPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
