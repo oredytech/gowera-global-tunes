@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Menu, AudioWaveform } from 'lucide-react';
 import {
@@ -5,9 +6,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/button';
+import { Link } from 'react-router-dom';
 
 export const MobileHeader = () => {
   const { theme, toggleTheme } = useTheme();
@@ -28,21 +31,22 @@ export const MobileHeader = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem>
-            À propos
+          <DropdownMenuItem asChild>
+            <Link to="/about">À propos</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Contact
+          <DropdownMenuItem asChild>
+            <Link to="/contact">Contact</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Suggérer une radio
+          <DropdownMenuItem asChild>
+            <Link to="/suggest-radio">Suggérer une radio</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Historique
+          <DropdownMenuItem asChild>
+            <Link to="/history">Historique</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Espace pub
+          <DropdownMenuItem asChild>
+            <Link to="/advertising">Espace pub</Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={toggleTheme}>
             {theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'}
           </DropdownMenuItem>
