@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { AudioPlayer } from './AudioPlayer';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { MobileHeader } from './MobileHeader';
+import { Footer } from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             {children}
           </div>
         </main>
+        <Footer />
         <AudioPlayer />
       </div>
     </div>
