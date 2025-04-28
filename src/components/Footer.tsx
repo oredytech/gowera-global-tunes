@@ -7,7 +7,7 @@ export const Footer = () => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <footer className="w-full border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <footer className="w-full border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mb-20">
       <div className="container flex flex-col gap-6 py-6 md:py-8">
         <nav className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
           <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
