@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { RadioStation } from '../services/radioApi';
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,53 +39,61 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const stationTags = station.tags ? station.tags.split(',').slice(0, 2) : [];
   
   return (
-    <div 
-      className={`station-card cursor-pointer flex flex-col ${isPlaying_ ? 'border border-primary/50' : ''}`}
-      onClick={() => playStation(station)}
+    <Link 
+      to={`/station/${station.stationuuid}`}
+      className={`station-card block ${isPlaying_ ? 'border border-primary/50' : ''}`}
     >
-      <div className="relative">
-        <img
-          src={stationImage}
-          alt={station.name}
-          className="w-full aspect-square object-cover rounded-md mb-3"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = placeholderImage;
-          }}
-        />
-        
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40"
-          onClick={handleFavoriteClick}
-        >
-          <Heart 
-            size={16} 
-            className={favorite ? 'fill-gowera-red text-gowera-red' : ''}
+      <div 
+        className="cursor-pointer"
+        onClick={(e) => {
+          e.preventDefault();
+          playStation(station);
+        }}
+      >
+        <div className="relative">
+          <img
+            src={stationImage}
+            alt={station.name}
+            className="w-full aspect-square object-cover rounded-md mb-3"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = placeholderImage;
+            }}
           />
-        </Button>
-      </div>
-      
-      <h3 className="font-medium text-sm truncate">{station.name}</h3>
-      
-      <div className="flex items-center gap-1 mt-1">
-        <span className="text-xs text-muted-foreground truncate">
-          {station.country || 'Unknown'}
-        </span>
-      </div>
-      
-      {stationTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {stationTags.map((tag) => (
-            <span 
-              key={tag} 
-              className="text-xs bg-secondary px-2 py-1 rounded-full"
-            >
-              {tag}
-            </span>
-          ))}
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40"
+            onClick={handleFavoriteClick}
+          >
+            <Heart 
+              size={16} 
+              className={favorite ? 'fill-gowera-red text-gowera-red' : ''}
+            />
+          </Button>
         </div>
-      )}
-    </div>
+        
+        <h3 className="font-medium text-sm truncate">{station.name}</h3>
+        
+        <div className="flex items-center gap-1 mt-1">
+          <span className="text-xs text-muted-foreground truncate">
+            {station.country || 'Unknown'}
+          </span>
+        </div>
+        
+        {stationTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {stationTags.map((tag) => (
+              <span 
+                key={tag} 
+                className="text-xs bg-secondary px-2 py-1 rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </Link>
   );
 };

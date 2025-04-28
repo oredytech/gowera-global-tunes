@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import ContactPage from "./pages/ContactPage";
 import SuggestRadioPage from "./pages/SuggestRadioPage";
 import HistoryPage from "./pages/HistoryPage";
 import AdvertisingPage from "./pages/AdvertisingPage";
+import StationDetailsPage from "./pages/StationDetailsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +54,8 @@ const App = () => (
                 <Route path="/suggest-radio" element={<SuggestRadioPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/advertising" element={<AdvertisingPage />} />
+                
+                <Route path="/station/:stationId" element={<StationDetailsPage />} />
                 
                 {/* Redirections pour les URL en français */}
                 <Route path="/pays" element={<Navigate to="/countries" replace />} />
