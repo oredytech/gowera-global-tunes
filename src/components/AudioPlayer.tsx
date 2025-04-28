@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Loader } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import placeholderImage from '/placeholder.svg';
 
 export const AudioPlayer: React.FC = () => {
-  const { currentStation, isPlaying, volume, togglePlayPause, setVolume } = useAudioPlayer();
+  const { currentStation, isPlaying, volume, togglePlayPause, setVolume, isLoading } = useAudioPlayer();
   
   if (!currentStation) return null;
   
@@ -40,8 +40,15 @@ export const AudioPlayer: React.FC = () => {
             size="icon"
             onClick={togglePlayPause}
             className="rounded-full"
+            disabled={isLoading}
           >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+            {isLoading ? (
+              <Loader className="animate-spin" size={20} />
+            ) : isPlaying ? (
+              <Pause size={20} />
+            ) : (
+              <Play size={20} />
+            )}
           </Button>
 
           <div className="hidden sm:flex items-center gap-2 w-32">
@@ -67,3 +74,4 @@ export const AudioPlayer: React.FC = () => {
     </div>
   );
 };
+

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 interface AudioPlayerContextProps {
   currentStation: RadioStation | null;
   isPlaying: boolean;
+  isLoading: boolean;
   volume: number;
   playStation: (station: RadioStation) => void;
   togglePlayPause: () => void;
@@ -18,6 +19,7 @@ const AudioPlayerContext = createContext<AudioPlayerContextProps | undefined>(un
 export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [volume, setVolumeState] = useState<number>(0.7);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -51,11 +53,19 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Stop current playback
       audioRef.current.pause();
       
+      // Set loading state
+      setIsLoading(true);
+      
       // Set new station
       setCurrentStation(station);
       
       // Set new source and play
       audioRef.current.src = station.url_resolved;
+      
+      // Add loading handler
+      audioRef.current.oncanplay = () => {
+        setIsLoading(false);
+      };
       
       // Play and handle errors
       const playPromise = audioRef.current.play();
@@ -70,31 +80,36 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             console.error('Playback error:', error);
             toast.error('Impossible de lire cette station');
             setIsPlaying(false);
+            setIsLoading(false);
           });
       }
     } catch (error) {
       console.error('Error playing station:', error);
       toast.error('Erreur lors de la lecture');
+      setIsLoading(false);
     }
   };
 
   const togglePlayPause = () => {
-    if (!audioRef.current || !currentStation) return;
+    if (!audioRef.current || !currentStation || isLoading) return;
     
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
+      setIsLoading(true);
       const playPromise = audioRef.current.play();
       
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             setIsPlaying(true);
+            setIsLoading(false);
           })
           .catch((error) => {
             console.error('Play error:', error);
             toast.error('Impossible de reprendre la lecture');
+            setIsLoading(false);
           });
       }
     }
@@ -121,6 +136,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       value={{
         currentStation,
         isPlaying,
+        isLoading,
         volume,
         playStation,
         togglePlayPause,
