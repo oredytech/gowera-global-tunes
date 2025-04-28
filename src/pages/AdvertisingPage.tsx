@@ -1,12 +1,9 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioTower, MonitorPlay, Trophy } from "lucide-react";
-
 const AdvertisingPage = () => {
-  return (
-    <div className="container max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8">Espace Publicitaire</h1>
+  return <div className="container max-w-4xl mx-auto px-0">
+      <h1 className="font-bold mb-8 text-2xl">Espace Publicitaire</h1>
       
       <div className="space-y-6">
         <p className="text-lg text-muted-foreground mb-8">
@@ -84,8 +81,6 @@ const AdvertisingPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdvertisingPage;
