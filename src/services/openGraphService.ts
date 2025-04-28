@@ -25,7 +25,7 @@ export const generateOpenGraphHtml = (station: RadioStation): string => {
   <meta property="og:title" content="${station.name} - GOWERA" />
   <meta property="og:description" content="${stationDescription}" />
   <meta property="og:image" content="${stationImage}" />
-  <meta property="og:url" content="https://gowera.lovable.app/station/${normalizeSlug(station.name)}" />
+  <meta property="og:url" content="https://gowera.com/station/${normalizeSlug(station.name)}" />
   <meta property="og:type" content="music.radio_station" />
   <meta property="og:site_name" content="GOWERA - Les voix du monde" />
   
@@ -36,7 +36,7 @@ export const generateOpenGraphHtml = (station: RadioStation): string => {
   <meta name="twitter:image" content="${stationImage}" />
   
   <!-- Redirection vers la page réelle après quelques secondes -->
-  <meta http-equiv="refresh" content="0;url=https://gowera.lovable.app/station/${normalizeSlug(station.name)}" />
+  <meta http-equiv="refresh" content="0;url=https://gowera.com/station/${normalizeSlug(station.name)}" />
 </head>
 <body>
   <p>Redirection vers ${station.name}...</p>
@@ -63,5 +63,5 @@ export const normalizeSlug = (name: string): string => {
  */
 export const getOpenGraphUrl = (stationName: string): string => {
   const slug = normalizeSlug(stationName);
-  return `https://gowera.lovable.app/og/${slug}.html`;
+  return `https://gowera.com/og/${slug}.html`;
 };
