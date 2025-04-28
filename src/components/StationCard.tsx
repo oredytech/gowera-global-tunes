@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { RadioStation } from '../services/radioApi';
@@ -17,8 +18,9 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const [favorite, setFavorite] = React.useState(isFavorite(station.stationuuid));
   
   const isPlaying_ = currentStation?.stationuuid === station.stationuuid && isPlaying;
-  
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     
     if (favorite) {
@@ -31,24 +33,18 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
     
     setFavorite(!favorite);
   };
-  
+
   const stationImage = station.favicon && station.favicon !== '' 
     ? station.favicon 
     : placeholderImage;
 
   const stationTags = station.tags ? station.tags.split(',').slice(0, 2) : [];
-  
+
   return (
-    <Link 
-      to={`/station/${station.stationuuid}`}
-      className={`station-card block ${isPlaying_ ? 'border border-primary/50' : ''}`}
-    >
-      <div 
-        className="cursor-pointer"
-        onClick={(e) => {
-          e.preventDefault();
-          playStation(station);
-        }}
+    <div className={`station-card block relative ${isPlaying_ ? 'border border-primary/50' : ''}`}>
+      <Link 
+        to={`/station/${station.stationuuid}`}
+        className="block"
       >
         <div className="relative">
           <img
@@ -70,6 +66,20 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
               size={16} 
               className={favorite ? 'fill-gowera-red text-gowera-red' : ''}
             />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute bottom-2 right-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40"
+            onClick={(e) => {
+              e.preventDefault();
+              playStation(station);
+            }}
+          >
+            {isPlaying_ ? (
+              <span className="h-2 w-2 rounded-full bg-primary"></span>
+            ) : null}
           </Button>
         </div>
         
@@ -93,7 +103,7 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
             ))}
           </div>
         )}
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
