@@ -22,6 +22,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [volume, setVolumeState] = useState<number>(0.7);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playRequestRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Create audio element if it doesn't exist
@@ -34,6 +35,18 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         console.error('Audio playback error:', e);
         toast.error('Erreur de lecture. Cette station n\'est peut-être pas disponible.');
         setIsPlaying(false);
+        setIsLoading(false);
+        playRequestRef.current = false;
+      };
+      
+      audioRef.current.onplaying = () => {
+        setIsPlaying(true);
+        setIsLoading(false);
+      };
+      
+      audioRef.current.onpause = () => {
+        setIsPlaying(false);
+        setIsLoading(false);
       };
     }
     
@@ -49,7 +62,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const playStation = (station: RadioStation) => {
     try {
       if (!audioRef.current) return;
-
+      
+      // Prevent overlapping play requests
+      if (playRequestRef.current) {
+        console.log('Play request already in progress, ignoring new request');
+        return;
+      }
+      
+      // Set flag to prevent concurrent requests
+      playRequestRef.current = true;
+      
       // Stop current playback
       audioRef.current.pause();
       
@@ -59,7 +81,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Set new station
       setCurrentStation(station);
       
-      // Set new source and play
+      // Set new source
       audioRef.current.src = station.url_resolved;
       
       // Add loading handler
@@ -75,18 +97,21 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           .then(() => {
             setIsPlaying(true);
             toast.success(`En lecture: ${station.name}`);
+            playRequestRef.current = false;
           })
           .catch((error) => {
             console.error('Playback error:', error);
             toast.error('Impossible de lire cette station');
             setIsPlaying(false);
             setIsLoading(false);
+            playRequestRef.current = false;
           });
       }
     } catch (error) {
       console.error('Error playing station:', error);
       toast.error('Erreur lors de la lecture');
       setIsLoading(false);
+      playRequestRef.current = false;
     }
   };
 
@@ -97,7 +122,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
+      // Prevent overlapping play requests
+      if (playRequestRef.current) return;
+      
+      playRequestRef.current = true;
       setIsLoading(true);
+      
       const playPromise = audioRef.current.play();
       
       if (playPromise !== undefined) {
@@ -105,11 +135,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           .then(() => {
             setIsPlaying(true);
             setIsLoading(false);
+            playRequestRef.current = false;
           })
           .catch((error) => {
             console.error('Play error:', error);
             toast.error('Impossible de reprendre la lecture');
             setIsLoading(false);
+            playRequestRef.current = false;
           });
       }
     }
@@ -129,6 +161,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     audioRef.current.src = '';
     setIsPlaying(false);
     setCurrentStation(null);
+    playRequestRef.current = false;
   };
 
   return (

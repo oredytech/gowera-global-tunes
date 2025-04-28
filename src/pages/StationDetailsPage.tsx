@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 
 const StationDetailsPage = () => {
   const { stationId } = useParams();
-  const { playStation } = useAudioPlayer();
+  const { playStation, currentStation } = useAudioPlayer();
   
   const { data: station, isLoading } = useQuery<RadioStation | null>({
     queryKey: ['station', stationId],
@@ -17,11 +18,17 @@ const StationDetailsPage = () => {
     enabled: !!stationId,
   });
 
+  // Utiliser useEffect avec une vérification pour éviter les lectures multiples
   useEffect(() => {
-    if (station) {
-      playStation(station);
+    if (station && (!currentStation || currentStation.stationuuid !== station.stationuuid)) {
+      // Petit délai pour éviter les conflits d'état
+      const timer = setTimeout(() => {
+        playStation(station);
+      }, 300);
+      
+      return () => clearTimeout(timer);
     }
-  }, [station, playStation]);
+  }, [station, playStation, currentStation]);
 
   if (isLoading) {
     return (
