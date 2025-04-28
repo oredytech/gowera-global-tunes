@@ -37,6 +37,7 @@ interface DesktopNavProps {
     label: string;
     icon: React.ReactNode;
     isActive: boolean;
+    badge?: React.ReactNode;
   }[];
 }
 
