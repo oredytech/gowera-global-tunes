@@ -19,16 +19,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader />
-        <main 
-          className={`flex-1 overflow-y-auto p-6 ${
-            hasPlayer ? 'pb-24 md:pb-20' : 'pb-20 md:pb-16'
-          }`}
-        >
-          <div className="container max-w-7xl px-px">
-            {children}
-          </div>
-        </main>
-        <Footer />
+        <div className="flex-1 overflow-y-auto">
+          <main 
+            className={`p-6 ${
+              hasPlayer ? 'pb-24 md:pb-20' : 'pb-20 md:pb-16'
+            }`}
+          >
+            <div className="container max-w-7xl px-px">
+              {children}
+            </div>
+          </main>
+          <Footer />
+        </div>
         <AudioPlayer />
       </div>
     </div>
