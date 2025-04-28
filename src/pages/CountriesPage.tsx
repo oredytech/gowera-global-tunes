@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCountries, getStationsByCountry } from '../services/radioApi';
@@ -29,7 +28,7 @@ const CountriesPage = () => {
   
   return (
     <div className="grid md:grid-cols-[300px_1fr] gap-6">
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg p-4 h-[calc(100vh-8rem)] md:h-auto overflow-hidden">
         <div className="mb-4">
           <Input
             placeholder="Filtrer les pays..."
@@ -41,7 +40,7 @@ const CountriesPage = () => {
           {loadingCountries ? (
             <div className="text-center py-4 text-muted-foreground">Chargement des pays...</div>
           ) : (
-            <ScrollArea className="h-[70vh] pr-4">
+            <ScrollArea className="h-[60vh] md:h-[70vh] pr-4">
               <div className="space-y-1">
                 {filteredCountries.map((country) => (
                   <Button
@@ -62,7 +61,7 @@ const CountriesPage = () => {
         </div>
       </div>
       
-      <div>
+      <div className="overflow-x-hidden">
         <SectionHeader 
           title={selectedCountry || "Sélectionnez un pays"} 
           description={selectedCountry 

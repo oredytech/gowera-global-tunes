@@ -33,11 +33,10 @@ export const StationGrid: React.FC<StationGridProps> = ({
   }
   
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 overflow-hidden">
       {stations.map((station) => (
         <StationCard key={station.stationuuid} station={station} />
       ))}
     </div>
   );
 };
-
