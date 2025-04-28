@@ -29,7 +29,7 @@ const LanguagesPage = () => {
   
   return (
     <div className="grid md:grid-cols-[300px_1fr] gap-6">
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg p-4 h-[calc(100vh-8rem)] md:h-auto overflow-hidden">
         <div className="mb-4">
           <Input
             placeholder="Filtrer les langues..."
@@ -41,7 +41,7 @@ const LanguagesPage = () => {
           {loadingLanguages ? (
             <div className="text-center py-4 text-muted-foreground">Chargement des langues...</div>
           ) : (
-            <ScrollArea className="h-[70vh] pr-4">
+            <ScrollArea className="h-[60vh] md:h-[70vh] pr-4">
               <div className="space-y-1">
                 {filteredLanguages.map((lang) => (
                   <Button
@@ -62,7 +62,7 @@ const LanguagesPage = () => {
         </div>
       </div>
       
-      <div>
+      <div className="overflow-x-hidden">
         <SectionHeader 
           title={selectedLanguage || "Sélectionnez une langue"} 
           description={selectedLanguage 
