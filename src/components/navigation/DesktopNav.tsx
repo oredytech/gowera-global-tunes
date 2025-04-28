@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '../../contexts/ThemeContext';
+import { AudioWaveform } from 'lucide-react';
 
 interface NavItemProps {
   to: string;
@@ -43,9 +43,12 @@ export const DesktopNav: React.FC<DesktopNavProps> = ({ navItems }) => {
   return (
     <>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold px-4 mb-1 font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
-          GOWERA
-        </h1>
+        <div className="flex items-center gap-2 px-4 mb-1">
+          <AudioWaveform className="w-8 h-8 text-gowera-blue" />
+          <h1 className="text-2xl font-bold font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
+            GOWERA
+          </h1>
+        </div>
         <p className="text-xs text-muted-foreground px-4">Les voix du monde</p>
       </div>
       <div className="space-y-1">

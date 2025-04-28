@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, AudioWaveform } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +14,12 @@ export const MobileHeader = () => {
 
   return (
     <div className="md:hidden flex items-center justify-between p-4 border-b">
-      <h1 className="text-2xl font-bold font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
-        GOWERA
-      </h1>
+      <div className="flex items-center gap-2">
+        <AudioWaveform className="w-6 h-6 text-gowera-blue" />
+        <h1 className="text-2xl font-bold font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
+          GOWERA
+        </h1>
+      </div>
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
