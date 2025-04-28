@@ -21,7 +21,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <MobileHeader />
         <main 
           className={`flex-1 overflow-y-auto p-6 ${
-            hasPlayer ? 'pb-52 md:pb-44' : 'pb-48 md:pb-32'
+            hasPlayer ? 'pb-24 md:pb-20' : 'pb-20 md:pb-16'
           }`}
         >
           <div className="container max-w-7xl px-px">
@@ -34,3 +34,4 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 };
+
