@@ -3,8 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '../../contexts/ThemeContext';
-import { ChevronLeft } from 'lucide-react';
-import { useSidebar } from '../ui/sidebar';
 
 interface NavItemProps {
   to: string;
@@ -14,8 +12,6 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ to, label, icon, isActive }) => {
-  const { state } = useSidebar();
-  
   return (
     <Link to={to}>
       <div
@@ -26,9 +22,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon, isActive }) => {
         }`}
       >
         <div className="w-5 h-5">{icon}</div>
-        {state !== 'collapsed' && (
-          <span className="text-sm font-medium">{label}</span>
-        )}
+        <span className="text-sm font-medium">{label}</span>
       </div>
     </Link>
   );
@@ -45,29 +39,14 @@ interface DesktopNavProps {
 
 export const DesktopNav: React.FC<DesktopNavProps> = ({ navItems }) => {
   const { theme, toggleTheme } = useTheme();
-  const { toggleSidebar, state } = useSidebar();
 
   return (
     <>
-      <div className="mb-8 flex items-center justify-between px-4">
-        <div>
-          <h1 className="text-2xl font-bold font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
-            {state !== 'collapsed' ? 'GOWERA' : 'G'}
-          </h1>
-          {state !== 'collapsed' && (
-            <p className="text-xs text-muted-foreground">Les voix du monde</p>
-          )}
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={toggleSidebar}
-        >
-          <ChevronLeft className={`h-4 w-4 transition-transform ${
-            state === 'collapsed' ? 'rotate-180' : ''
-          }`} />
-        </Button>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold px-4 mb-1 font-poppins text-transparent bg-clip-text bg-gradient-to-r from-gowera-blue to-gowera-purple">
+          GOWERA
+        </h1>
+        <p className="text-xs text-muted-foreground px-4">Les voix du monde</p>
       </div>
       <div className="space-y-1">
         {navItems.map((item) => (
@@ -86,11 +65,7 @@ export const DesktopNav: React.FC<DesktopNavProps> = ({ navItems }) => {
           className="w-full justify-start"
           onClick={toggleTheme}
         >
-          {state !== 'collapsed' ? (
-            theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'
-          ) : (
-            theme === 'dark' ? '☀️' : '🌙'
-          )}
+          {theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'}
         </Button>
       </div>
     </>

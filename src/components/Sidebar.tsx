@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { MobileNav } from './navigation/MobileNav';
 import { DesktopNav } from './navigation/DesktopNav';
 import { getNavItems } from './navigation/navItems';
-import { SidebarProvider, Sidebar as ShadcnSidebar } from './ui/sidebar';
 
 interface SidebarProps {
   className?: string;
@@ -16,13 +15,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   const navItems = getNavItems(isActive);
 
   return (
-    <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen w-full">
-        <ShadcnSidebar className={className}>
-          <DesktopNav navItems={navItems} />
-        </ShadcnSidebar>
-        <MobileNav navItems={navItems} />
-      </div>
-    </SidebarProvider>
+    <>
+      <aside className={`hidden md:flex md:w-64 flex-col h-screen border-r p-4 ${className}`}>
+        <DesktopNav navItems={navItems} />
+      </aside>
+      <MobileNav navItems={navItems} />
+    </>
   );
 };
