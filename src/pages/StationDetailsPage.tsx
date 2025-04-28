@@ -1,20 +1,27 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getStationByUuid, RadioStation } from '../services/radioApi';
 import { StationCard } from '../components/StationCard';
 import { SectionHeader } from '../components/SectionHeader';
 import { Loader2 } from 'lucide-react';
+import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 
 const StationDetailsPage = () => {
   const { stationId } = useParams();
+  const { playStation } = useAudioPlayer();
   
   const { data: station, isLoading } = useQuery<RadioStation | null>({
     queryKey: ['station', stationId],
     queryFn: () => getStationByUuid(stationId || ''),
     enabled: !!stationId,
   });
+
+  useEffect(() => {
+    if (station) {
+      playStation(station);
+    }
+  }, [station, playStation]);
 
   if (isLoading) {
     return (
