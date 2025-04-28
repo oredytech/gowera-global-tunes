@@ -55,7 +55,7 @@ const App = () => (
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/advertising" element={<AdvertisingPage />} />
                 
-                <Route path="/station/:stationId" element={<StationDetailsPage />} />
+                <Route path="/station/:slug" element={<StationDetailsPage />} />
                 
                 {/* Redirections pour les URL en français */}
                 <Route path="/pays" element={<Navigate to="/countries" replace />} />

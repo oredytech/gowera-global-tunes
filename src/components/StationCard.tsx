@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { RadioStation } from '../services/radioApi';
@@ -18,6 +17,13 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const [favorite, setFavorite] = React.useState(isFavorite(station.stationuuid));
   
   const isPlaying_ = currentStation?.stationuuid === station.stationuuid && isPlaying;
+
+  const normalizeSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,7 +49,7 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   return (
     <div className={`station-card block relative ${isPlaying_ ? 'border border-primary/50' : ''}`}>
       <Link 
-        to={`/station/${station.stationuuid}`}
+        to={`/station/${normalizeSlug(station.name)}`}
         className="block"
       >
         <div className="relative">

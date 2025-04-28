@@ -9,15 +9,27 @@ import { Loader2 } from 'lucide-react';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { useIsMobile } from '../hooks/use-mobile';
 
+const normalizeSlug = (name: string) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const StationDetailsPage = () => {
-  const { stationId } = useParams();
+  const { slug } = useParams();
   const { playStation, currentStation } = useAudioPlayer();
   const isMobile = useIsMobile();
   
   const { data: station, isLoading } = useQuery<RadioStation | null>({
-    queryKey: ['station', stationId],
-    queryFn: () => getStationByUuid(stationId || ''),
-    enabled: !!stationId,
+    queryKey: ['stations', 'search', slug],
+    queryFn: async () => {
+      const searchTerm = slug?.replace(/-/g, ' ');
+      const stations = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(searchTerm || '')}&limit=1`)
+        .then(res => res.json());
+      return stations.length > 0 ? stations[0] : null;
+    },
+    enabled: !!slug,
   });
 
   // Utiliser useEffect avec une vérification pour éviter les lectures multiples
