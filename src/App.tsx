@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { Layout } from "./components/Layout";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -54,6 +54,20 @@ const App = () => (
                 <Route path="/suggest-radio" element={<SuggestRadioPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/advertising" element={<AdvertisingPage />} />
+                
+                {/* Redirections pour les URL en français */}
+                <Route path="/pays" element={<Navigate to="/countries" replace />} />
+                <Route path="/populaires" element={<Navigate to="/popular" replace />} />
+                <Route path="/genres" element={<GenresPage />} />
+                <Route path="/langues" element={<Navigate to="/languages" replace />} />
+                <Route path="/recherche" element={<Navigate to="/search" replace />} />
+                <Route path="/favoris" element={<Navigate to="/favorites" replace />} />
+                <Route path="/a-propos" element={<Navigate to="/about" replace />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/suggerer-radio" element={<Navigate to="/suggest-radio" replace />} />
+                <Route path="/historique" element={<Navigate to="/history" replace />} />
+                <Route path="/publicite" element={<Navigate to="/advertising" replace />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>

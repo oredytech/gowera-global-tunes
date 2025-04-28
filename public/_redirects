@@ -1,0 +1,14 @@
+
+# Redirections for shared URLs
+/pays              /countries         301
+/populaires        /popular           301
+/langues           /languages         301
+/recherche         /search            301
+/favoris           /favorites         301
+/a-propos          /about             301
+/suggerer-radio    /suggest-radio     301
+/historique        /history           301
+/publicite         /advertising       301
+
+# Handle client-side routing
+/*    /index.html   200
