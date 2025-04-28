@@ -16,7 +16,7 @@ export const AudioPlayer: React.FC = () => {
     : placeholderImage;
 
   return (
-    <div className="audio-player flex items-center p-2 px-4">
+    <div className="audio-player fixed bottom-0 left-0 right-0 flex items-center bg-background/80 backdrop-blur-md border-t p-2 px-4 md:mb-0 mb-16">
       <div className="flex items-center flex-grow gap-4">
         <img 
           src={stationImage} 
