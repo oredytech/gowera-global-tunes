@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { Play, Pause, Volume2, VolumeX, Loader } from 'lucide-react';
@@ -17,7 +16,7 @@ export const AudioPlayer: React.FC = () => {
 
   return (
     <div className="audio-player fixed bottom-0 left-0 right-0 flex items-center bg-background/80 backdrop-blur-md border-t p-2 px-4 md:mb-0 mb-16">
-      <div className="flex items-center flex-grow gap-4">
+      <div className="flex items-center justify-between w-full gap-4">
         <img 
           src={stationImage} 
           alt={currentStation.name}
@@ -74,4 +73,3 @@ export const AudioPlayer: React.FC = () => {
     </div>
   );
 };
-
