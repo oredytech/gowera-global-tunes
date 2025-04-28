@@ -8,6 +8,7 @@ interface MobileNavProps {
     label: string;
     icon: React.ReactNode;
     isActive: boolean;
+    badge?: React.ReactNode;
   }[];
 }
 
@@ -18,13 +19,20 @@ export const MobileNav: React.FC<MobileNavProps> = ({ navItems }) => {
         <Link 
           key={item.to} 
           to={item.to} 
-          className={`flex flex-col items-center p-1 rounded-lg ${
+          className={`flex flex-col items-center p-1 rounded-lg relative ${
             item.isActive 
               ? 'text-primary'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <div className="w-5 h-5">{item.icon}</div>
+          <div className="w-5 h-5 relative">
+            {item.icon}
+            {item.badge && (
+              <div className="absolute -top-1 -right-2">
+                {item.badge}
+              </div>
+            )}
+          </div>
           <span className="text-[10px] mt-0.5 truncate max-w-[60px]">{item.label}</span>
         </Link>
       ))}

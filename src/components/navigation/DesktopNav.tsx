@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,10 @@ interface NavItemProps {
   label: string;
   icon: React.ReactNode;
   isActive: boolean;
+  badge?: React.ReactNode;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ to, label, icon, isActive }) => {
+const NavItem: React.FC<NavItemProps> = ({ to, label, icon, isActive, badge }) => {
   return (
     <Link to={to}>
       <div
@@ -23,6 +25,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon, isActive }) => {
       >
         <div className="w-5 h-5">{icon}</div>
         <span className="text-sm font-medium">{label}</span>
+        {badge}
       </div>
     </Link>
   );
@@ -59,6 +62,7 @@ export const DesktopNav: React.FC<DesktopNavProps> = ({ navItems }) => {
             label={item.label}
             icon={item.icon}
             isActive={item.isActive}
+            badge={item.badge}
           />
         ))}
       </div>
