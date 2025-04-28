@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +8,8 @@ import { Loader2 } from 'lucide-react';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Helmet } from 'react-helmet-async';
-import { normalizeSlug, getOpenGraphUrl } from '../services/openGraphService';
+import { normalizeSlug } from '../services/openGraphService';
+import { ShareButtons } from '../components/ShareButtons';
 
 const StationDetailsPage = () => {
   const { slug } = useParams();
@@ -27,10 +27,8 @@ const StationDetailsPage = () => {
     enabled: !!slug,
   });
 
-  // Utiliser useEffect avec une vérification pour éviter les lectures multiples
   useEffect(() => {
     if (station && (!currentStation || currentStation.stationuuid !== station.stationuuid)) {
-      // Petit délai pour éviter les conflits d'état
       const timer = setTimeout(() => {
         playStation(station);
       }, 300);
@@ -39,11 +37,8 @@ const StationDetailsPage = () => {
     }
   }, [station, playStation, currentStation]);
 
-  // Modification des métadonnées de la page quand la station est chargée
   useEffect(() => {
     if (station) {
-      // Ici on pourrait appeler un service serverless pour générer le fichier HTML
-      // Pour l'instant on se contente de mettre à jour le titre de la page
       document.title = `${station.name} - GOWERA`;
     }
   }, [station]);
@@ -65,7 +60,6 @@ const StationDetailsPage = () => {
     );
   }
 
-  // Préparation des métadonnées Open Graph
   const stationImage = station.favicon && station.favicon !== '' 
     ? station.favicon 
     : 'https://gowera.lovable.app/placeholder.svg';
@@ -95,8 +89,12 @@ const StationDetailsPage = () => {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          <div className="w-full">
+          <div className="w-full space-y-4">
             <StationCard station={station} />
+            <ShareButtons 
+              url={window.location.href}
+              title={`Écoutez ${station.name} sur GOWERA`}
+            />
           </div>
           
           <div className="space-y-4 overflow-hidden">
