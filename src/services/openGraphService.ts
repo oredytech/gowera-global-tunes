@@ -9,7 +9,7 @@ import { RadioStation } from './radioApi';
 export const generateOpenGraphHtml = (station: RadioStation): string => {
   const stationImage = station.favicon && station.favicon !== '' 
     ? station.favicon 
-    : 'https://gowera.lovable.app/placeholder.svg';
+    : 'https://gowera.com/placeholder.svg';
   
   const stationDescription = station.tags 
     ? `${station.name} - ${station.country || 'Radio'} - ${station.tags.split(',').slice(0, 3).join(', ')}`
