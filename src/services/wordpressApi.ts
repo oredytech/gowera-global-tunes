@@ -124,3 +124,22 @@ export async function fetchArticlesByCategory(categorySlug: string, perPage: num
   const filteredArticles = allArticles.filter((_, index) => index % 3 === 0); // Simulation simple
   return filteredArticles.slice(0, perPage * wordpressSites.length);
 }
+
+// Récupérer le contenu complet d'un article
+export async function fetchFullArticleContent(siteUrl: string, articleId: number): Promise<string> {
+  try {
+    const response = await fetch(`${siteUrl}/wp-json/wp/v2/posts/${articleId}`);
+    
+    if (!response.ok) {
+      toast.error("Erreur lors de la récupération de l'article");
+      return "Contenu de l'article indisponible";
+    }
+    
+    const article = await response.json();
+    return article.content.rendered;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du contenu de l'article:", error);
+    toast.error("Erreur lors de la récupération de l'article");
+    return "Contenu de l'article indisponible";
+  }
+}

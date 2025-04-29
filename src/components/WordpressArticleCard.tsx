@@ -6,12 +6,25 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useNavigate } from 'react-router-dom';
 
 interface WordpressArticleCardProps {
   article: WordPressArticle;
 }
 
 const WordpressArticleCard: React.FC<WordpressArticleCardProps> = ({ article }) => {
+  const navigate = useNavigate();
+  const [open, setOpen] = React.useState(false);
+  
   // Nettoyer le HTML de l'extrait
   const cleanExcerpt = (html: string) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -28,6 +41,21 @@ const WordpressArticleCard: React.FC<WordpressArticleCardProps> = ({ article }) 
     } catch (e) {
       return dateString;
     }
+  };
+
+  const handleOpenOriginalSite = () => {
+    window.open(article.link, '_blank');
+    setOpen(false);
+  };
+
+  const handleStayOnGowera = () => {
+    navigate(`/article/${article.id}`, { 
+      state: { 
+        article,
+        sourceUrl: article.source.url
+      } 
+    });
+    setOpen(false);
   };
 
   return (
@@ -62,11 +90,36 @@ const WordpressArticleCard: React.FC<WordpressArticleCardProps> = ({ article }) 
       </CardContent>
       
       <CardFooter>
-        <Button variant="outline" size="sm" className="w-full" asChild>
-          <a href={article.link} target="_blank" rel="noopener noreferrer">
-            Lire l'article <ExternalLink size={14} className="ml-2" />
-          </a>
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full">
+              Lire l'article <ExternalLink size={14} className="ml-2" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Comment souhaitez-vous lire cet article ?</DialogTitle>
+              <DialogDescription>
+                Vous pouvez lire l'article sur le site d'origine ou rester sur Gowera.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleOpenOriginalSite}
+                className="w-full sm:w-auto"
+              >
+                Lire sur le site d'origine <ExternalLink size={14} className="ml-2" />
+              </Button>
+              <Button 
+                onClick={handleStayOnGowera}
+                className="w-full sm:w-auto"
+              >
+                Rester sur Gowera
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   );
