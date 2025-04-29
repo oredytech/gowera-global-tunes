@@ -21,16 +21,20 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   className = "",
   icon
 }) => {
+  // Clean the title from HTML entities
+  const cleanTitle = title.replace(/&#8211;/g, '-')
+                          .replace(/&#8217;/g, "'")
+                          .replace(/&amp;/g, '&')
+                          .replace(/&quot;/g, '"')
+                          .replace(/&#039;/g, "'");
+  
   return (
     <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 ${className}`}>
-      <div className="flex items-center gap-2">
-        {icon && <span className="text-primary">{icon}</span>}
-        <div>
-          <h2 className="text-2xl font-poppins font-semibold mb-1">{title}</h2>
-          {description && (
-            <p className="text-muted-foreground">{description}</p>
-          )}
-        </div>
+      <div>
+        <h2 className="text-2xl font-poppins font-semibold mb-1">{cleanTitle}</h2>
+        {description && (
+          <p className="text-muted-foreground">{description}</p>
+        )}
       </div>
       
       {link && (
