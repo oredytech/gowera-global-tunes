@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Radio, Globe, Music, Languages, Heart, Search } from 'lucide-react';
+import { Home, Radio, Globe, Music, Languages, Heart, Search, Newspaper } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { useFavoritesCount } from '../../hooks/useFavoritesCount';
 
@@ -9,6 +9,7 @@ export const getNavItems = (isActive: (path: string) => boolean) => {
   
   return [
     { to: '/', label: 'Accueil', icon: <Home size={20} />, isActive: isActive('/') },
+    { to: '/news', label: 'Actualités', icon: <Newspaper size={20} />, isActive: isActive('/news') },
     { to: '/popular', label: 'Populaires', icon: <Radio size={20} />, isActive: isActive('/popular') },
     { to: '/countries', label: 'Pays', icon: <Globe size={20} />, isActive: isActive('/countries') },
     { to: '/genres', label: 'Genres', icon: <Music size={20} />, isActive: isActive('/genres') },

@@ -13,6 +13,7 @@ import GenresPage from "./pages/GenresPage";
 import LanguagesPage from "./pages/LanguagesPage";
 import SearchPage from "./pages/SearchPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import NewsPage from "./pages/NewsPage";
 import NotFound from "./pages/NotFound";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -28,6 +29,7 @@ const App = () => (
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/news" element={<NewsPage />} />
         <Route path="/popular" element={<PopularStations />} />
         <Route path="/countries" element={<CountriesPage />} />
         <Route path="/genres" element={<GenresPage />} />
@@ -43,6 +45,7 @@ const App = () => (
         <Route path="/station/:slug" element={<StationDetailsPage />} />
         
         {/* Redirections pour les URL en français */}
+        <Route path="/actualites" element={<Navigate to="/news" replace />} />
         <Route path="/pays" element={<Navigate to="/countries" replace />} />
         <Route path="/populaires" element={<Navigate to="/popular" replace />} />
         <Route path="/genres" element={<GenresPage />} />
