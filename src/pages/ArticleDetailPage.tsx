@@ -152,7 +152,7 @@ const ArticleDetailPage = () => {
     };
     return new Date(dateString).toLocaleDateString('fr-FR', options);
   };
-  return <div className="container py-6 px-0">
+  return <div className="container px-0 py-0">
       <Helmet>
         <title>{cleanTitle} - Gowera</title>
         <style>{articleStyles}</style>
