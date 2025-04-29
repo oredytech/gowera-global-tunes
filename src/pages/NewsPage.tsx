@@ -13,10 +13,12 @@ import {
   PaginationPrevious 
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const NewsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { articles, isLoading, pagination } = useWordpressArticles(selectedCategory);
+  const isMobile = useIsMobile();
 
   const ArticlesSkeleton = () => (
     <>
@@ -61,7 +63,7 @@ const NewsPage = () => {
 
       {articles.length > 0 && pagination.totalPages > 1 && (
         <Pagination className="mt-8">
-          <PaginationContent>
+          <PaginationContent className="flex-wrap justify-center gap-2">
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => pagination.prevPage()}
@@ -69,16 +71,69 @@ const NewsPage = () => {
               />
             </PaginationItem>
             
-            {[...Array(pagination.totalPages)].map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink 
-                  isActive={pagination.currentPage === i + 1}
-                  onClick={() => pagination.goToPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
+            {isMobile
+              ? // Mobile: Show limited pagination numbers
+                <>
+                  {pagination.currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => pagination.goToPage(1)}
+                      >
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                  
+                  {pagination.currentPage > 2 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => pagination.goToPage(pagination.currentPage - 1)}
+                      >
+                        {pagination.currentPage - 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationLink
+                      isActive
+                    >
+                      {pagination.currentPage}
+                    </PaginationLink>
+                  </PaginationItem>
+                  
+                  {pagination.currentPage < pagination.totalPages - 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => pagination.goToPage(pagination.currentPage + 1)}
+                      >
+                        {pagination.currentPage + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                  
+                  {pagination.currentPage < pagination.totalPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => pagination.goToPage(pagination.totalPages)}
+                      >
+                        {pagination.totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                </>
+              : // Desktop: Show all pagination numbers
+                [...Array(pagination.totalPages)].map((_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink 
+                      isActive={pagination.currentPage === i + 1}
+                      onClick={() => pagination.goToPage(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))
+            }
             
             <PaginationItem>
               <PaginationNext 
