@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -107,24 +106,22 @@ const articleStyles = `
     overflow-x: auto;
   }
 `;
-
 const ArticleDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [articleContent, setArticleContent] = useState<string>('');
-  
+
   // Get the article data from location state
   const article = location.state?.article as WordPressArticle | undefined;
   const sourceUrl = location.state?.sourceUrl as string | undefined;
-  
   useEffect(() => {
     // If no article data was passed, redirect back to news page
     if (!article || !sourceUrl) {
       navigate('/news');
       return;
     }
-    
+
     // Fetch the full article content
     const getArticleContent = async () => {
       setLoading(true);
@@ -137,53 +134,37 @@ const ArticleDetailPage = () => {
         setLoading(false);
       }
     };
-    
     getArticleContent();
   }, [article, navigate, sourceUrl]);
-  
   if (!article) {
     return null;
   }
-  
+
   // Clean title from HTML entities
-  const cleanTitle = article.title.rendered
-    .replace(/&#8211;/g, '-')
-    .replace(/&#8217;/g, "'");
-  
+  const cleanTitle = article.title.rendered.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'");
+
   // Format date
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
+      day: 'numeric'
     };
     return new Date(dateString).toLocaleDateString('fr-FR', options);
   };
-
-  return (
-    <div className="container py-6">
+  return <div className="container py-6 px-0">
       <Helmet>
         <title>{cleanTitle} - Gowera</title>
         <style>{articleStyles}</style>
       </Helmet>
       
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={() => navigate(-1)}
-        className="mb-6"
-      >
+      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-6">
         <ArrowLeft size={16} className="mr-2" />
         Retour aux actualités
       </Button>
       
       <article className="max-w-3xl mx-auto">
-        <SectionHeader
-          title={cleanTitle}
-          description={`Article de ${article.source.name}`}
-          icon={<Newspaper className="h-6 w-6" />}
-          className="mb-8"
-        />
+        <SectionHeader title={cleanTitle} description={`Article de ${article.source.name}`} icon={<Newspaper className="h-6 w-6" />} className="mb-8" />
         
         <div className="flex flex-wrap gap-4 items-center text-sm text-muted-foreground mt-6 mb-8">
           <div className="flex items-center">
@@ -194,29 +175,19 @@ const ArticleDetailPage = () => {
             <User size={16} className="mr-1" />
             {article.source.name}
           </div>
-          {article.categories && article.categories.length > 0 && (
-            <div className="flex items-center">
+          {article.categories && article.categories.length > 0 && <div className="flex items-center">
               <Tag size={16} className="mr-1" />
               Catégories
-            </div>
-          )}
+            </div>}
         </div>
         
-        {article.featured_media_url && (
-          <div className="mb-8">
-            <img
-              src={article.featured_media_url}
-              alt={cleanTitle}
-              className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-md"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-        )}
+        {article.featured_media_url && <div className="mb-8">
+            <img src={article.featured_media_url} alt={cleanTitle} className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-md" onError={e => {
+          (e.target as HTMLImageElement).style.display = 'none';
+        }} />
+          </div>}
         
-        {loading ? (
-          <div className="space-y-6">
+        {loading ? <div className="space-y-6">
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-3/4" />
@@ -224,20 +195,13 @@ const ArticleDetailPage = () => {
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-2/3" />
             <Skeleton className="h-20 w-full" />
-          </div>
-        ) : (
-          <div 
-            className="prose prose-lg max-w-none article-content"
-            dangerouslySetInnerHTML={{ __html: articleContent }}
-          />
-        )}
+          </div> : <div className="prose prose-lg max-w-none article-content" dangerouslySetInnerHTML={{
+        __html: articleContent
+      }} />}
         
         <div className="mt-12 pt-6 border-t">
           <h3 className="font-semibold text-xl mb-4">Partager cet article</h3>
-          <ShareButtons 
-            url={window.location.href} 
-            title={cleanTitle} 
-          />
+          <ShareButtons url={window.location.href} title={cleanTitle} />
         </div>
         
         <div className="mt-8 pt-4 border-t text-center text-sm text-muted-foreground italic">
@@ -245,9 +209,6 @@ const ArticleDetailPage = () => {
           <p className="mt-2">Gowera n'est pas responsable du contenu des articles externes.</p>
         </div>
       </article>
-    </div>
-  );
+    </div>;
 };
-
 export default ArticleDetailPage;
-
