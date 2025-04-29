@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { SectionHeader } from '../components/SectionHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Newspaper } from 'lucide-react';
+
 const NewsPage = () => {
   const newsItems = [{
     id: 1,
@@ -19,6 +21,7 @@ const NewsPage = () => {
     date: "10 Avril 2025",
     description: "GOWERA fait peau neuve avec une interface plus intuitive et plus rapide."
   }];
+
   return <div className="container py-0 px-0">
       <SectionHeader title="Actualités" description="Les dernières nouvelles et mises à jour de GOWERA" icon={<Newspaper className="h-6 w-6" />} />
 
@@ -36,6 +39,11 @@ const NewsPage = () => {
             </CardFooter>
           </Card>)}
       </div>
+      
+      <div className="mt-8 text-center text-sm text-muted-foreground italic">
+        Gowera n'est pas responsable des articles externes.
+      </div>
     </div>;
 };
+
 export default NewsPage;
