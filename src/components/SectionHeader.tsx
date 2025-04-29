@@ -10,6 +10,7 @@ interface SectionHeaderProps {
   link?: string;
   linkText?: string;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 export const SectionHeader: React.FC<SectionHeaderProps> = ({ 
@@ -17,15 +18,19 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   description, 
   link, 
   linkText = "Voir tout",
-  className = ""
+  className = "",
+  icon
 }) => {
   return (
     <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 ${className}`}>
-      <div>
-        <h2 className="text-2xl font-poppins font-semibold mb-1">{title}</h2>
-        {description && (
-          <p className="text-muted-foreground">{description}</p>
-        )}
+      <div className="flex items-center gap-2">
+        {icon && <span className="text-primary">{icon}</span>}
+        <div>
+          <h2 className="text-2xl font-poppins font-semibold mb-1">{title}</h2>
+          {description && (
+            <p className="text-muted-foreground">{description}</p>
+          )}
+        </div>
       </div>
       
       {link && (
@@ -38,4 +43,4 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
       )}
     </div>
   );
-};
+}
