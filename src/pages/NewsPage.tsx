@@ -1,49 +1,100 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SectionHeader } from '../components/SectionHeader';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Newspaper } from 'lucide-react';
+import { Newspaper, Filter } from 'lucide-react';
+import { useWordpressArticles } from '../hooks/useWordpressArticles';
+import WordpressArticleCard from '../components/WordpressArticleCard';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const NewsPage = () => {
-  const newsItems = [{
-    id: 1,
-    title: "Lancement de 50 nouvelles stations",
-    date: "20 Avril 2025",
-    description: "GOWERA s'agrandit avec l'ajout de 50 nouvelles stations de radio du monde entier."
-  }, {
-    id: 2,
-    title: "Nouvelle fonctionnalité de partage",
-    date: "15 Avril 2025",
-    description: "Partagez facilement vos stations préférées avec vos amis sur les réseaux sociaux."
-  }, {
-    id: 3,
-    title: "Mise à jour de l'interface utilisateur",
-    date: "10 Avril 2025",
-    description: "GOWERA fait peau neuve avec une interface plus intuitive et plus rapide."
-  }];
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { articles, isLoading, pagination } = useWordpressArticles(selectedCategory);
 
-  return <div className="container py-0 px-0">
-      <SectionHeader title="Actualités" description="Les dernières nouvelles et mises à jour de GOWERA" icon={<Newspaper className="h-6 w-6" />} />
+  const ArticlesSkeleton = () => (
+    <>
+      {Array(6).fill(0).map((_, i) => (
+        <div key={i} className="flex flex-col h-full">
+          <Skeleton className="h-6 w-3/4 mb-2" />
+          <Skeleton className="h-4 w-1/2 mb-6" />
+          <Skeleton className="h-32 w-full mb-4" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-3/4 mb-4" />
+          <Skeleton className="h-9 w-full mt-auto" />
+        </div>
+      ))}
+    </>
+  );
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {newsItems.map(news => <Card key={news.id}>
-            <CardHeader>
-              <CardTitle>{news.title}</CardTitle>
-              <CardDescription>{news.date}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>{news.description}</p>
-            </CardContent>
-            <CardFooter>
-              <p className="text-sm text-muted-foreground">GOWERA</p>
-            </CardFooter>
-          </Card>)}
+  return (
+    <div className="container py-0 px-0">
+      <SectionHeader 
+        title="Actualités" 
+        description="Les dernières nouvelles des médias partenaires" 
+        icon={<Newspaper className="h-6 w-6" />}
+      />
+
+      <div className="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {isLoading ? (
+          <ArticlesSkeleton />
+        ) : articles.length > 0 ? (
+          articles.map(article => (
+            <WordpressArticleCard 
+              key={`${article.source.name}-${article.id}`} 
+              article={article} 
+            />
+          ))
+        ) : (
+          <div className="col-span-full text-center py-10">
+            <p className="text-muted-foreground">Aucun article trouvé</p>
+          </div>
+        )}
       </div>
+
+      {articles.length > 0 && pagination.totalPages > 1 && (
+        <Pagination className="mt-8">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => pagination.prevPage()}
+                className={pagination.currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+              />
+            </PaginationItem>
+            
+            {[...Array(pagination.totalPages)].map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink 
+                  isActive={pagination.currentPage === i + 1}
+                  onClick={() => pagination.goToPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => pagination.nextPage()}
+                className={pagination.currentPage === pagination.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
       
       <div className="mt-8 text-center text-sm text-muted-foreground italic">
         Gowera n'est pas responsable des articles externes.
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default NewsPage;
