@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Menu, AudioWaveform } from 'lucide-react';
+import { Menu, AudioWaveform, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,34 +24,43 @@ export const MobileHeader = () => {
         </h1>
       </div>
       
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem asChild>
-            <Link to="/about">À propos</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/contact">Contact</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/suggest-radio">Suggérer une radio</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/history">Historique</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/advertising">Espace pub</Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={toggleTheme}>
-            {theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" asChild>
+          <Link to="/search">
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Recherche</span>
+          </Link>
+        </Button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem asChild>
+              <Link to="/about">À propos</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/contact">Contact</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/suggest-radio">Suggérer une radio</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/history">Historique</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/advertising">Espace pub</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={toggleTheme}>
+              {theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 };
