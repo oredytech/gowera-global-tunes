@@ -9,6 +9,8 @@
 /suggerer-radio    /suggest-radio     301
 /historique        /history           301
 /publicite         /advertising       301
+/actualites        /news              301
 
 # Handle client-side routing
 /*    /index.html   200
+
