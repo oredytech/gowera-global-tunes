@@ -2,6 +2,7 @@
 import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import { db } from "./config";
 import { RadioSuggestion, ApprovedRadio } from "./types";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 // Fonction pour enregistrer une suggestion de radio
 export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "createdAt" | "sponsored">): Promise<string> {
@@ -24,9 +25,22 @@ export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "cre
     
     console.log("Document ajouté avec ID: ", docRef.id);
     
-    // Envoyer un email à l'administrateur (à implémenter plus tard avec Firebase Functions)
-    // Ceci est simplement simulé pour le moment
-    console.log(`Email would be sent to infosgowera@gmail.com about new radio suggestion: ${suggestion.radioName}`);
+    // Appeler la fonction Cloud Function pour envoyer l'email
+    try {
+      const functions = getFunctions();
+      const sendAdminNotification = httpsCallable(functions, 'sendAdminNotificationEmail');
+      
+      await sendAdminNotification({
+        radioName: suggestion.radioName,
+        submitterId: suggestion.senderEmail,
+        suggestionId: docRef.id
+      });
+      
+      console.log("Notification email sent to admin about new radio suggestion");
+    } catch (emailError) {
+      // Ne pas bloquer le processus si l'envoi d'email échoue
+      console.error("Error sending admin notification email:", emailError);
+    }
     
     return docRef.id;
   } catch (error) {

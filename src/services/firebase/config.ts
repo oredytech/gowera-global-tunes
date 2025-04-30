@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 // Configuration Firebase
 const firebaseConfig = {
@@ -18,3 +19,10 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const db = getFirestore(app);
+export const functions = getFunctions(app);
+
+// Connecter à l'émulateur des fonctions en développement si nécessaire
+// Décommenter pour utiliser l'émulateur local
+// if (import.meta.env.DEV) {
+//   connectFunctionsEmulator(functions, "localhost", 5001);
+// }
