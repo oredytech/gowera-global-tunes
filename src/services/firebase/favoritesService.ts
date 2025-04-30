@@ -19,18 +19,24 @@ export async function saveFavorite(userId: string, stationId: string): Promise<v
 // Fonction pour récupérer les favoris d'un utilisateur
 export async function getUserFavorites(userId: string): Promise<string[]> {
   try {
+    // Si l'utilisateur n'est pas connecté, retourner un tableau vide
+    if (!userId) return [];
+    
     const favoritesRef = collection(db, "users", userId, "favorites");
     const querySnapshot = await getDocs(favoritesRef);
     
     const favorites: string[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      favorites.push(data.stationId);
+      if (data.stationId) {
+        favorites.push(data.stationId);
+      }
     });
     
     return favorites;
   } catch (error) {
     console.error("Error getting user favorites:", error);
+    // En cas d'erreur de permissions ou autre, retourner un tableau vide
     return [];
   }
 }
@@ -38,6 +44,9 @@ export async function getUserFavorites(userId: string): Promise<string[]> {
 // Fonction pour supprimer un favori
 export async function removeFavoriteFromDb(userId: string, stationId: string): Promise<void> {
   try {
+    // Si l'utilisateur n'est pas connecté, ne rien faire
+    if (!userId) return;
+    
     const favoritesRef = collection(db, "users", userId, "favorites");
     const q = query(favoritesRef, where("stationId", "==", stationId));
     const querySnapshot = await getDocs(q);

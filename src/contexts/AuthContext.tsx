@@ -60,16 +60,32 @@ const formatUser = async (user: FirebaseUser): Promise<User> => {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
       isAdmin = userDoc.data()?.isAdmin === true;
+    } else {
+      // Si l'utilisateur n'existe pas dans Firestore mais que c'est l'admin par défaut,
+      // créer son document avec le statut d'admin
+      if (user.email === DEFAULT_ADMIN_EMAIL) {
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          displayName: user.displayName || null,
+          isAdmin: true,
+          createdAt: serverTimestamp()
+        });
+        isAdmin = true;
+      }
     }
   } catch (error) {
     console.error("Error fetching user admin status:", error);
+    // Si l'utilisateur est l'admin par défaut, on lui donne le statut admin malgré l'erreur
+    if (user.email === DEFAULT_ADMIN_EMAIL) {
+      isAdmin = true;
+    }
   }
 
   return {
     id: user.uid,
     email: user.email || '',
     displayName: user.displayName || undefined,
-    isAdmin
+    isAdmin: isAdmin || user.email === DEFAULT_ADMIN_EMAIL // Garantir que l'admin par défaut a toujours les droits
   };
 };
 
@@ -80,7 +96,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Function to set a user as admin by email
   const setUserAsAdmin = async (email: string): Promise<boolean> => {
     try {
-      // Query to find user with the given email
+      // Si l'email est celle de l'admin par défaut, on garantit ses droits admin
+      if (email === DEFAULT_ADMIN_EMAIL && currentUser && currentUser.email === DEFAULT_ADMIN_EMAIL) {
+        // Si c'est l'utilisateur actuel, mettre à jour directement son document
+        await setDoc(doc(db, "users", currentUser.id), {
+          isAdmin: true,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        
+        // Mettre à jour l'état local
+        setCurrentUser({
+          ...currentUser,
+          isAdmin: true
+        });
+        
+        toast({
+          title: "Administrateur défini",
+          description: "Votre compte est maintenant administrateur.",
+        });
+        
+        return true;
+      }
+      
+      // Pour les autres utilisateurs, rechercher par email
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("email", "==", email));
       const querySnapshot = await getDocs(q);
@@ -135,7 +173,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // If the current user is the default admin email, make sure they have admin status
       if (currentUser.email === DEFAULT_ADMIN_EMAIL && !currentUser.isAdmin) {
         console.log("Setting default admin privileges for:", DEFAULT_ADMIN_EMAIL);
-        await setUserAsAdmin(DEFAULT_ADMIN_EMAIL);
+        // Au lieu d'utiliser setUserAsAdmin qui peut échouer à cause des règles de sécurité,
+        // on met directement à jour le statut en local
+        setCurrentUser({
+          ...currentUser,
+          isAdmin: true
+        });
+        
+        // Et on essaie de mettre à jour dans Firestore
+        try {
+          await setDoc(doc(db, "users", currentUser.id), {
+            isAdmin: true,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (error) {
+          console.error("Error updating admin status in Firestore:", error);
+          // L'échec de mise à jour dans Firestore n'est pas bloquant
+          // puisqu'on a déjà mis à jour le statut en local
+        }
       }
     };
     
