@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { RadioTower, Clock, AlertCircle, Check } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { db, approveRadioSuggestion } from "@/services/firebaseService";
+import { db, approveRadioSuggestion } from "@/services/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";

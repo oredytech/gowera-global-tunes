@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { RadioSuggestion, saveRadioSuggestion } from "@/services/firebaseService";
+import { RadioSuggestion, saveRadioSuggestion } from "@/services/firebase";
 import { toast } from "@/hooks/use-toast";
 import { formSchema, SuggestRadioFormValues } from "./RadioFormSchema";
 import { RadioInfoSection } from "./RadioInfoSection";

@@ -1,6 +1,5 @@
-
 import { RadioStation } from './radioApi';
-import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebaseService';
+import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebase';
 import { getAuth } from 'firebase/auth';
 
 const FAVORITES_KEY = 'gowera_favorites';

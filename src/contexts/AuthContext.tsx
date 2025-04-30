@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   getAuth, 
@@ -9,7 +8,7 @@ import {
   updateProfile,
   User as FirebaseUser
 } from "firebase/auth";
-import { app } from '../services/firebaseService';
+import { app } from '../services/firebase';
 
 type User = {
   id: string;
