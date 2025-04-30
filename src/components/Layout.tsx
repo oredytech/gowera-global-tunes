@@ -5,6 +5,7 @@ import { AudioPlayer } from './AudioPlayer';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { MobileHeader } from './MobileHeader';
 import { Footer } from './Footer';
+import { UserProfileButton } from './auth/UserProfileButton';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader />
+        <div className="hidden md:flex items-center justify-end p-4 border-b">
+          <UserProfileButton />
+        </div>
         <div className="flex-1 overflow-y-auto">
           <main 
             className={`p-6 ${
@@ -36,4 +40,3 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 };
-

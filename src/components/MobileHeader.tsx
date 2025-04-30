@@ -11,6 +11,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
+import { UserProfileButton } from './auth/UserProfileButton';
 
 export const MobileHeader = () => {
   const { theme, toggleTheme } = useTheme();
@@ -25,6 +26,8 @@ export const MobileHeader = () => {
       </div>
       
       <div className="flex items-center gap-2">
+        <UserProfileButton />
+        
         <Button variant="ghost" size="icon" asChild>
           <Link to="/search">
             <Search className="h-5 w-5" />
