@@ -16,6 +16,7 @@ interface StationCardProps {
 export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const { playStation, currentStation, isPlaying } = useAudioPlayer();
   const [favorite, setFavorite] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   
   const isPlaying_ = currentStation?.stationuuid === station.stationuuid && isPlaying;
 
@@ -29,6 +30,19 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
     checkFavorite();
   }, [station.stationuuid]);
 
+  // Écouter les événements de mise à jour des favoris
+  useEffect(() => {
+    const handleFavoritesUpdated = async () => {
+      const isFav = await isFavorite(station.stationuuid);
+      setFavorite(isFav);
+    };
+    
+    window.addEventListener('favoritesUpdated', handleFavoritesUpdated);
+    return () => {
+      window.removeEventListener('favoritesUpdated', handleFavoritesUpdated);
+    };
+  }, [station.stationuuid]);
+
   const normalizeSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -39,6 +53,10 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     
     try {
       if (favorite) {
@@ -53,6 +71,8 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
     } catch (error) {
       console.error('Error updating favorite status:', error);
       toast.error('Une erreur est survenue');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -83,6 +103,7 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
             size="icon"
             className="absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40"
             onClick={handleFavoriteClick}
+            disabled={isProcessing}
           >
             <Heart 
               size={16} 

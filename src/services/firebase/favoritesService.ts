@@ -1,17 +1,23 @@
 
-import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, setDoc } from "firebase/firestore";
 import { db } from "./config";
+import { getAuth } from "firebase/auth";
+import { toast } from "sonner";
 
 // Nouvelle fonction pour sauvegarder les favoris d'un utilisateur dans Firestore
 export async function saveFavorite(userId: string, stationId: string): Promise<void> {
   try {
-    const favoriteRef = collection(db, "users", userId, "favorites");
-    await addDoc(favoriteRef, {
+    // Générer un ID unique basé sur l'ID station pour éviter les doublons
+    const favoriteId = `${stationId}`;
+    const favoriteRef = doc(db, "users", userId, "favorites", favoriteId);
+    
+    await setDoc(favoriteRef, {
       stationId,
       addedAt: Timestamp.now()
     });
   } catch (error) {
     console.error("Error saving favorite:", error);
+    toast.error("Impossible d'ajouter aux favoris. Veuillez réessayer plus tard.");
     throw error;
   }
 }
@@ -25,12 +31,15 @@ export async function getUserFavorites(userId: string): Promise<string[]> {
     const favorites: string[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      favorites.push(data.stationId);
+      if (!data.deleted) {
+        favorites.push(data.stationId);
+      }
     });
     
     return favorites;
   } catch (error) {
     console.error("Error getting user favorites:", error);
+    toast.error("Impossible de récupérer vos favoris. Veuillez réessayer plus tard.");
     return [];
   }
 }
@@ -38,18 +47,17 @@ export async function getUserFavorites(userId: string): Promise<string[]> {
 // Fonction pour supprimer un favori
 export async function removeFavoriteFromDb(userId: string, stationId: string): Promise<void> {
   try {
-    const favoritesRef = collection(db, "users", userId, "favorites");
-    const q = query(favoritesRef, where("stationId", "==", stationId));
-    const querySnapshot = await getDocs(q);
+    // Utiliser directement l'ID de document basé sur l'ID de la station
+    const favoriteId = `${stationId}`;
+    const favoriteRef = doc(db, "users", userId, "favorites", favoriteId);
     
-    querySnapshot.forEach(async (document) => {
-      await updateDoc(doc(db, "users", userId, "favorites", document.id), {
-        deleted: true,
-        deletedAt: Timestamp.now()
-      });
+    await updateDoc(favoriteRef, {
+      deleted: true,
+      deletedAt: Timestamp.now()
     });
   } catch (error) {
     console.error("Error removing favorite:", error);
+    toast.error("Impossible de supprimer ce favori. Veuillez réessayer plus tard.");
     throw error;
   }
 }

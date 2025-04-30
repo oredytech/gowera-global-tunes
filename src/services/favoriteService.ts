@@ -1,6 +1,8 @@
+
 import { RadioStation } from './radioApi';
 import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebase';
 import { getAuth } from 'firebase/auth';
+import { toast } from "sonner";
 
 const FAVORITES_KEY = 'gowera_favorites';
 
@@ -27,7 +29,13 @@ export async function getFavorites(): Promise<string[]> {
   
   if (currentUser) {
     // Si l'utilisateur est connecté, récupérer les favoris depuis Firebase
-    return await getUserFavorites(currentUser.uid);
+    try {
+      return await getUserFavorites(currentUser.uid);
+    } catch (error) {
+      console.error('Error getting Firebase favorites:', error);
+      toast.error("Impossible de récupérer vos favoris. Utilisation des favoris locaux.");
+      return getLocalFavorites();
+    }
   } else {
     // Sinon, récupérer les favoris depuis le localStorage
     return getLocalFavorites();
@@ -41,7 +49,17 @@ export async function addFavorite(stationUuid: string): Promise<void> {
   
   if (currentUser) {
     // Si l'utilisateur est connecté, ajouter le favori à Firebase
-    await saveFavorite(currentUser.uid, stationUuid);
+    try {
+      await saveFavorite(currentUser.uid, stationUuid);
+    } catch (error) {
+      console.error('Error adding Firebase favorite:', error);
+      // Fallback: ajouter au localStorage si Firebase échoue
+      const favorites = getLocalFavorites();
+      if (!favorites.includes(stationUuid)) {
+        favorites.push(stationUuid);
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+      }
+    }
   } else {
     // Sinon, ajouter le favori au localStorage
     try {
@@ -66,7 +84,15 @@ export async function removeFavorite(stationUuid: string): Promise<void> {
   
   if (currentUser) {
     // Si l'utilisateur est connecté, supprimer le favori de Firebase
-    await removeFavoriteFromDb(currentUser.uid, stationUuid);
+    try {
+      await removeFavoriteFromDb(currentUser.uid, stationUuid);
+    } catch (error) {
+      console.error('Error removing Firebase favorite:', error);
+      // Fallback: supprimer du localStorage si Firebase échoue
+      const favorites = getLocalFavorites();
+      const newFavorites = favorites.filter(id => id !== stationUuid);
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+    }
   } else {
     // Sinon, supprimer le favori du localStorage
     try {
