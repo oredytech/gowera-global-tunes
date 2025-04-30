@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { saveRadioSuggestion } from "@/services/firebaseService";
+import { saveRadioSuggestion, RadioSuggestion } from "@/services/firebaseService";
 
 const formSchema = z.object({
   radioName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -30,13 +31,16 @@ const formSchema = z.object({
   senderEmail: z.string().email("Votre email doit être valide")
 });
 
+// Define a type based on the form schema
+type FormValues = z.infer<typeof formSchema>;
+
 const SuggestRadioPage = () => {
   const [sponsorDialogOpen, setSponsorDialogOpen] = useState(false);
-  const [submittedValues, setSubmittedValues] = useState<z.infer<typeof formSchema> | null>(null);
+  const [submittedValues, setSubmittedValues] = useState<FormValues | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       radioName: "",
@@ -50,12 +54,25 @@ const SuggestRadioPage = () => {
     }
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormValues) => {
     try {
       setIsSubmitting(true);
       
+      // Prepare data for Firebase - ensure all required fields are present
+      const suggestionData: Omit<RadioSuggestion, "createdAt" | "sponsored"> = {
+        radioName: values.radioName,
+        streamUrl: values.streamUrl,
+        description: values.description,
+        contactEmail: values.contactEmail,
+        contactPhone: values.contactPhone,
+        senderEmail: values.senderEmail,
+        // Optional fields
+        websiteUrl: values.websiteUrl || undefined,
+        logoUrl: values.logoUrl || undefined
+      };
+      
       // Enregistrer la suggestion dans Firebase
-      const docId = await saveRadioSuggestion(values);
+      const docId = await saveRadioSuggestion(suggestionData);
       setSubmissionId(docId);
       
       // Stocker les valeurs pour le dialogue de sponsoring
