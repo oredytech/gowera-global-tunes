@@ -1,3 +1,4 @@
+
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore, collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, orderBy, limit } from "firebase/firestore";
@@ -28,6 +29,8 @@ export interface RadioSuggestion {
   contactEmail: string;
   contactPhone: string;
   senderEmail: string;
+  country?: string;  // Added country field
+  tags?: string;     // Added tags field
   sponsored: boolean;
   createdAt: Date | Timestamp;
 }
@@ -53,7 +56,8 @@ export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "cre
     
     // Vérifier si les données requises sont présentes
     if (!suggestion.radioName || !suggestion.streamUrl || !suggestion.description || 
-        !suggestion.contactEmail || !suggestion.contactPhone || !suggestion.senderEmail) {
+        !suggestion.contactEmail || !suggestion.contactPhone || !suggestion.senderEmail || 
+        !suggestion.country) {  // Added country validation
       throw new Error("Des champs obligatoires sont manquants");
     }
     

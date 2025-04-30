@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ApprovedRadio } from '../services/firebaseService';
 import { Heart, BadgePlus } from 'lucide-react';
@@ -28,15 +27,14 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       url_resolved: radio.streamUrl,
       favicon: radio.logoUrl || placeholderImage,
       homepage: radio.websiteUrl || '',
-      country: '', // Set default empty string instead of radio.country
+      country: radio.country || '',
       countrycode: '',
-      state: '',
       language: '',
-      tags: '', // Set default empty string instead of radio.tags
+      tags: radio.tags || '',
       votes: 0,
       codec: '',
       bitrate: 0,
-      lastcheckok: 1, // Changed from boolean true to number 1
+      lastcheckok: 1,
       lastchecktime: '',
       lastcheckoktime: '',
       clicktimestamp: '',

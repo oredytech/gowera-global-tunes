@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, User } from "lucide-react";
+import { Mail, Phone, User, Globe, Tag } from "lucide-react";
 import { RadioSuggestion, saveRadioSuggestion } from "@/services/firebaseService";
 import { toast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Form schema definition
 const formSchema = z.object({
@@ -20,7 +21,9 @@ const formSchema = z.object({
   description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
   contactEmail: z.string().email("L'email doit être valide"),
   contactPhone: z.string().min(10, "Le numéro de téléphone doit être valide"),
-  senderEmail: z.string().email("Votre email doit être valide")
+  senderEmail: z.string().email("Votre email doit être valide"),
+  country: z.string().min(1, "Veuillez sélectionner un pays"),
+  tags: z.string().min(3, "Veuillez fournir au moins un tag"),
 });
 
 // Define a type based on the form schema
@@ -30,6 +33,31 @@ interface SuggestRadioFormProps {
   onSubmitSuccess: (values: SuggestRadioFormValues, submissionId: string) => void;
   onSubmitError: (error: Error) => void;
 }
+
+// List of common countries for the dropdown
+const commonCountries = [
+  "République Démocratique du Congo",
+  "Congo-Brazzaville",
+  "France",
+  "Belgique",
+  "Suisse",
+  "Canada",
+  "Cameroun",
+  "Côte d'Ivoire",
+  "Sénégal",
+  "Mali",
+  "Burkina Faso",
+  "Gabon",
+  "Guinée",
+  "Bénin",
+  "Togo",
+  "Niger",
+  "Rwanda",
+  "Burundi",
+  "Madagascar",
+  "Haïti",
+  "Autre"
+];
 
 export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadioFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +72,9 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
       description: "",
       contactEmail: "",
       contactPhone: "",
-      senderEmail: ""
+      senderEmail: "",
+      country: "",
+      tags: "",
     }
   });
 
@@ -62,7 +92,10 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
         senderEmail: values.senderEmail,
         // Optional fields
         websiteUrl: values.websiteUrl || undefined,
-        logoUrl: values.logoUrl || undefined
+        logoUrl: values.logoUrl || undefined,
+        // New fields for country and tags
+        country: values.country,
+        tags: values.tags
       };
       
       // Save suggestion to Firebase
@@ -142,6 +175,57 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
               <FormControl>
                 <Input placeholder="https://www.radiookapi.net" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} 
+        />
+
+        <FormField 
+          control={form.control} 
+          name="country" 
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Pays d'origine
+              </FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un pays" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {commonCountries.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Pays d'origine ou principal de diffusion de la radio
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField 
+          control={form.control} 
+          name="tags" 
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Tags / Genres
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="musique, actualités, sport, culture" {...field} />
+              </FormControl>
+              <FormDescription>
+                Séparez les tags par des virgules (ex: musique, actualités, sport)
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )} 
