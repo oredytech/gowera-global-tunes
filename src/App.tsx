@@ -44,7 +44,6 @@ const App = () => {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          {/* Use a conditional approach to show Layout for all routes except homepage */}
           <Routes>
             <Route path="/" element={<Index />} />
             

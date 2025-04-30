@@ -18,7 +18,7 @@ const Index = () => {
           Découvrez une collection mondiale de stations radio, organisées par pays, genre et langue.
         </p>
         <Button asChild size="lg" className="mt-4">
-          <Link to="/popular">Commencer l'écoute</Link>
+          <Link to="/home">Commencer l'écoute</Link>
         </Button>
       </div>
     </div>
