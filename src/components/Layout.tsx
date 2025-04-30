@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { AudioPlayer } from './AudioPlayer';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
@@ -7,11 +8,7 @@ import { MobileHeader } from './MobileHeader';
 import { Footer } from './Footer';
 import { UserProfileButton } from './auth/UserProfileButton';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout: React.FC = () => {
   const { currentStation } = useAudioPlayer();
   const hasPlayer = !!currentStation;
 
@@ -30,7 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             }`}
           >
             <div className="container max-w-7xl px-px">
-              {children}
+              <Outlet />
             </div>
           </main>
           <Footer />

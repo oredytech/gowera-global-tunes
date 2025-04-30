@@ -9,6 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { AuthGuard } from "./components/auth/AuthGuard";
 
 import Home from "./pages/Home";
+import Index from "./pages/Index";
 import PopularStations from "./pages/PopularStations";
 import CountriesPage from "./pages/CountriesPage";
 import GenresPage from "./pages/GenresPage";
@@ -35,9 +36,11 @@ const App = () => {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
+          {/* Use a conditional approach to show Layout for all routes except homepage */}
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route element={<Layout />}>
+              <Route path="/home" element={<Home />} />
               <Route path="/news" element={<NewsPage />} />
               <Route path="/popular" element={<PopularStations />} />
               <Route path="/countries" element={<CountriesPage />} />
@@ -73,8 +76,8 @@ const App = () => {
               <Route path="/publicite" element={<Navigate to="/advertising" replace />} />
               
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
+            </Route>
+          </Routes>
         </AuthProvider>
       </TooltipProvider>
     </>
