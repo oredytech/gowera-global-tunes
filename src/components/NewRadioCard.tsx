@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ApprovedRadio } from '../services/firebaseService';
 import { Heart, BadgePlus } from 'lucide-react';
@@ -41,8 +40,7 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       clicktimestamp: '',
       clickcount: 0,
       clicktrend: 0,
-      geo_lat: null,
-      geo_long: null,
+      // Remove geo_lat and geo_long as they don't exist in RadioStation
       has_extended_info: false
     });
   };
