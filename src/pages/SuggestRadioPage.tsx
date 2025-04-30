@@ -7,7 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Radio, RadioTower } from "lucide-react";
+import { Radio, RadioTower, Mail, User, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const formSchema = z.object({
@@ -17,7 +17,8 @@ const formSchema = z.object({
   logoUrl: z.string().url("L'URL du logo doit être valide").optional(),
   description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
   contactEmail: z.string().email("L'email doit être valide"),
-  contactPhone: z.string().min(10, "Le numéro de téléphone doit être valide")
+  contactPhone: z.string().min(10, "Le numéro de téléphone doit être valide"),
+  senderEmail: z.string().email("Votre email doit être valide")
 });
 
 const SuggestRadioPage = () => {
@@ -30,7 +31,8 @@ const SuggestRadioPage = () => {
       logoUrl: "",
       description: "",
       contactEmail: "",
-      contactPhone: ""
+      contactPhone: "",
+      senderEmail: ""
     }
   });
 
@@ -133,23 +135,50 @@ const SuggestRadioPage = () => {
               <FormMessage />
             </FormItem>} />
 
-          <FormField control={form.control} name="contactEmail" render={({
-            field
-          }) => <FormItem>
-              <FormLabel>Email de contact</FormLabel>
-              <FormControl>
-                <Input placeholder="contact@radiookapi.net" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>} />
+          <div className="p-4 border rounded-md bg-muted/50">
+            <h3 className="text-lg font-medium mb-4">Informations de contact de la radio</h3>
+            <div className="space-y-6">
+              <FormField control={form.control} name="contactEmail" render={({
+                field
+              }) => <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email de contact de la radio
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="contact@radiookapi.net" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>} />
 
-          <FormField control={form.control} name="contactPhone" render={({
+              <FormField control={form.control} name="contactPhone" render={({
+                field
+              }) => <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Téléphone de contact de la radio
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="+243 851 006 476" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>} />
+            </div>
+          </div>
+
+          <FormField control={form.control} name="senderEmail" render={({
             field
           }) => <FormItem>
-              <FormLabel>Téléphone de contact</FormLabel>
+              <FormLabel className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Votre email pour être contacté
+              </FormLabel>
               <FormControl>
-                <Input placeholder="+243 851 006 476" {...field} />
+                <Input placeholder="votre.email@example.com" {...field} />
               </FormControl>
+              <FormDescription>
+                Nous utiliserons cette adresse pour vous informer de l'ajout de votre radio
+              </FormDescription>
               <FormMessage />
             </FormItem>} />
 
