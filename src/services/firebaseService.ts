@@ -29,8 +29,9 @@ export interface RadioSuggestion {
   contactEmail: string;
   contactPhone: string;
   senderEmail: string;
-  country?: string;  // Added country field
-  tags?: string;     // Added tags field
+  country: string;       // Required country field
+  tags: string;          // Required tags field
+  language: string;      // Added language field
   sponsored: boolean;
   createdAt: Date | Timestamp;
 }
@@ -44,8 +45,9 @@ export interface ApprovedRadio {
   logoUrl?: string;
   description: string;
   approvedAt: Date;
-  country?: string;  // Add optional country property
-  tags?: string;     // Add optional tags property
+  country: string;       // Required country property
+  tags: string;          // Required tags property
+  language: string;      // Added language property
 }
 
 // Fonction pour enregistrer une suggestion de radio
@@ -57,7 +59,7 @@ export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "cre
     // Vérifier si les données requises sont présentes
     if (!suggestion.radioName || !suggestion.streamUrl || !suggestion.description || 
         !suggestion.contactEmail || !suggestion.contactPhone || !suggestion.senderEmail || 
-        !suggestion.country) {  // Added country validation
+        !suggestion.country || !suggestion.tags || !suggestion.language) {  // Updated validation
       throw new Error("Des champs obligatoires sont manquants");
     }
     
@@ -134,8 +136,9 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
         logoUrl: data.logoUrl || undefined,
         description: data.description,
         approvedAt: data.createdAt.toDate(),
-        country: data.country || undefined,
-        tags: data.tags || undefined
+        country: data.country || '',
+        tags: data.tags || '',
+        language: data.language || ''
       });
     });
     

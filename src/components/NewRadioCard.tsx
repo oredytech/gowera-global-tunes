@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ApprovedRadio } from '../services/firebaseService';
 import { Heart, BadgePlus } from 'lucide-react';
@@ -29,7 +30,7 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       homepage: radio.websiteUrl || '',
       country: radio.country || '',
       countrycode: '',
-      language: '',
+      language: radio.language || '',
       tags: radio.tags || '',
       votes: 0,
       codec: '',
@@ -40,7 +41,6 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       clicktimestamp: '',
       clickcount: 0,
       clicktrend: 0,
-      ssl_error: 0,
       geo_lat: null,
       geo_long: null,
       has_extended_info: false

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, User, Globe, Tag } from "lucide-react";
+import { Mail, Phone, User, Globe, Tag, Music } from "lucide-react";
 import { RadioSuggestion, saveRadioSuggestion } from "@/services/firebaseService";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,7 @@ const formSchema = z.object({
   senderEmail: z.string().email("Votre email doit être valide"),
   country: z.string().min(1, "Veuillez sélectionner un pays"),
   tags: z.string().min(3, "Veuillez fournir au moins un tag"),
+  language: z.string().min(1, "Veuillez sélectionner une langue"),
 });
 
 // Define a type based on the form schema
@@ -59,6 +60,37 @@ const commonCountries = [
   "Autre"
 ];
 
+// List of common languages
+const commonLanguages = [
+  "Français",
+  "Anglais",
+  "Lingala",
+  "Swahili",
+  "Kikongo",
+  "Tshiluba",
+  "Portugais",
+  "Espagnol",
+  "Arabe",
+  "Wolof",
+  "Bambara",
+  "Autre"
+];
+
+// List of genres/categories for suggestions
+const suggestedTags = [
+  "Musique",
+  "Actualités",
+  "Sport",
+  "Culture",
+  "Religion",
+  "Éducation",
+  "Humour",
+  "Politique",
+  "Économie",
+  "Divertissement",
+  "Jeunesse"
+];
+
 export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadioFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -75,6 +107,7 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
       senderEmail: "",
       country: "",
       tags: "",
+      language: "",
     }
   });
 
@@ -93,9 +126,10 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
         // Optional fields
         websiteUrl: values.websiteUrl || undefined,
         logoUrl: values.logoUrl || undefined,
-        // New fields for country and tags
+        // Required classification fields
         country: values.country,
-        tags: values.tags
+        tags: values.tags,
+        language: values.language
       };
       
       // Save suggestion to Firebase
@@ -121,33 +155,143 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField 
-          control={form.control} 
-          name="radioName" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom de la radio</FormLabel>
-              <FormControl>
-                <Input placeholder="Radio Okapi" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
+        <div className="p-4 border rounded-md bg-muted/20 mb-2">
+          <h3 className="text-lg font-medium mb-4">Informations principales de la radio</h3>
+          <div className="space-y-6">
+            <FormField 
+              control={form.control} 
+              name="radioName" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom de la radio</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Radio Okapi" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
 
-        <FormField 
-          control={form.control} 
-          name="streamUrl" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL du flux streaming</FormLabel>
-              <FormControl>
-                <Input placeholder="https://stream.radiookapi.net/stream" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
+            <FormField 
+              control={form.control} 
+              name="streamUrl" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL du flux streaming</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://stream.radiookapi.net/stream" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+          </div>
+        </div>
+
+        <div className="p-4 border rounded-md bg-muted/20">
+          <h3 className="text-lg font-medium mb-4">Classification de la radio</h3>
+          <div className="space-y-6">
+            <FormField 
+              control={form.control} 
+              name="country" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Pays d'origine
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez un pays" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {commonCountries.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Pays d'origine ou principal de diffusion de la radio
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField 
+              control={form.control} 
+              name="language" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Music className="h-4 w-4" />
+                    Langue principale
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez une langue" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {commonLanguages.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Langue principale de diffusion de la radio
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField 
+              control={form.control} 
+              name="tags" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Genres / Catégories
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="musique, actualités, sport, culture" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Séparez les tags par des virgules (ex: musique, actualités, sport)
+                  </FormDescription>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {suggestedTags.map((tag) => (
+                      <Badge 
+                        key={tag}
+                        variant="outline" 
+                        className="cursor-pointer hover:bg-primary/10"
+                        onClick={() => {
+                          const currentTags = field.value ? field.value.split(',').map(t => t.trim()).filter(t => t !== '') : [];
+                          if (!currentTags.includes(tag)) {
+                            const newTags = [...currentTags, tag].join(', ');
+                            field.onChange(newTags);
+                          }
+                        }}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+          </div>
+        </div>
 
         <FormField 
           control={form.control} 
@@ -175,57 +319,6 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
               <FormControl>
                 <Input placeholder="https://www.radiookapi.net" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} 
-        />
-
-        <FormField 
-          control={form.control} 
-          name="country" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                Pays d'origine
-              </FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un pays" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {commonCountries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Pays d'origine ou principal de diffusion de la radio
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField 
-          control={form.control} 
-          name="tags" 
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Tags / Genres
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="musique, actualités, sport, culture" {...field} />
-              </FormControl>
-              <FormDescription>
-                Séparez les tags par des virgules (ex: musique, actualités, sport)
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )} 
