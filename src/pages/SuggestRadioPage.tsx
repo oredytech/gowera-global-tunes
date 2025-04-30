@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,6 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { saveRadioSuggestion } from "@/services/firebaseService";
 
 const formSchema = z.object({
   radioName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -33,6 +33,8 @@ const formSchema = z.object({
 const SuggestRadioPage = () => {
   const [sponsorDialogOpen, setSponsorDialogOpen] = useState(false);
   const [submittedValues, setSubmittedValues] = useState<z.infer<typeof formSchema> | null>(null);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,13 +52,16 @@ const SuggestRadioPage = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Dans un environnement réel, vous utiliseriez ici un service backend pour envoyer l'email
-      console.log("Sending email to infosgowera@gmail.com with the following data:", values);
+      setIsSubmitting(true);
       
-      // Simulation d'envoi d'email (dans un projet réel, cela serait fait par une API backend)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Enregistrer la suggestion dans Firebase
+      const docId = await saveRadioSuggestion(values);
+      setSubmissionId(docId);
       
+      // Stocker les valeurs pour le dialogue de sponsoring
       setSubmittedValues(values);
+      
+      // Ouvrir la boîte de dialogue de sponsoring
       setSponsorDialogOpen(true);
       
       // Le toast de succès sera affiché uniquement si l'utilisateur ferme la boîte de dialogue
@@ -68,6 +73,8 @@ const SuggestRadioPage = () => {
         description: "Une erreur est survenue lors de l'envoi du formulaire. Veuillez réessayer.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -95,6 +102,9 @@ const SuggestRadioPage = () => {
       title: "Suggestion envoyée",
       description: "Nous examinerons votre suggestion dans les plus brefs délais."
     });
+    
+    // Réinitialiser le formulaire
+    form.reset();
   };
 
   return (
@@ -114,7 +124,7 @@ const SuggestRadioPage = () => {
           </div>
           
           <p className="text-sm text-muted-foreground">
-            Toutes les informations soumises seront envoyées à notre équipe à <span className="font-medium">infosgowera@gmail.com</span>
+            Toutes les informations soumises seront enregistrées dans notre base de données et un email sera envoyé à notre équipe à <span className="font-medium">infosgowera@gmail.com</span>
           </p>
         </CardContent>
       </Card>
@@ -221,8 +231,8 @@ const SuggestRadioPage = () => {
               <FormMessage />
             </FormItem>} />
 
-          <Button type="submit" className="w-full">
-            Soumettre la radio
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? "Envoi en cours..." : "Soumettre la radio"}
           </Button>
         </form>
       </Form>
