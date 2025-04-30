@@ -1,8 +1,11 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPopularStations, getTrendingStations, getRandomStations } from '../services/radioApi';
+import { getNewlyApprovedRadios, ApprovedRadio } from '../services/firebaseService';
 import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
+import { NewRadiosGrid } from '../components/NewRadiosGrid';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 
 const Home = () => {
@@ -28,6 +31,13 @@ const Home = () => {
     queryKey: ['randomStations'],
     queryFn: () => getRandomStations(5)
   });
+  const {
+    data: newRadios,
+    isLoading: loadingNewRadios
+  } = useQuery({
+    queryKey: ['newRadios'],
+    queryFn: () => getNewlyApprovedRadios(6)
+  });
 
   const playRandomStation = () => {
     if (randomStations && randomStations.length > 0) {
@@ -37,7 +47,17 @@ const Home = () => {
     }
   };
 
-  return <div className="space-y-10 mx-0">      
+  return <div className="space-y-10 mx-0">
+      {newRadios && newRadios.length > 0 && (
+        <section className="mx-0">
+          <SectionHeader 
+            title="Nouvelles radios" 
+            description="Les stations récemment ajoutées à GOWERA" 
+          />
+          <NewRadiosGrid radios={newRadios} isLoading={loadingNewRadios} />
+        </section>
+      )}
+      
       <section className="mx-0">
         <SectionHeader title="Tendances" description="Les stations les plus écoutées en ce moment" link="/popular" />
         <StationGrid stations={trendingStations?.slice(0, 10) || []} isLoading={loadingTrending} />

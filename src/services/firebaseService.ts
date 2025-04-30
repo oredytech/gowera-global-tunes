@@ -1,7 +1,6 @@
-
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, addDoc, Timestamp, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 
 // Configuration Firebase
 const firebaseConfig = {
@@ -31,6 +30,17 @@ export interface RadioSuggestion {
   senderEmail: string;
   sponsored: boolean;
   createdAt: Date | Timestamp;
+}
+
+// Interface for the approved radios to display
+export interface ApprovedRadio {
+  id: string;
+  radioName: string;
+  streamUrl: string;
+  websiteUrl?: string;
+  logoUrl?: string;
+  description: string;
+  approvedAt: Date;
 }
 
 // Fonction pour enregistrer une suggestion de radio
@@ -89,6 +99,42 @@ export async function updateSponsorStatus(suggestionId: string, sponsored: boole
     console.log(`Updating sponsor status for ${suggestionId} to ${sponsored}`);
   } catch (error) {
     console.error("Error updating sponsor status:", error);
+    throw error;
+  }
+}
+
+// Fonction pour obtenir les radios approuvées les plus récentes
+export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<ApprovedRadio[]> {
+  try {
+    console.log(`Fetching newly approved radios, limit: ${limitCount}`);
+    
+    const approvedRadiosQuery = query(
+      collection(db, "radioSuggestions"),
+      where("sponsored", "==", true),
+      orderBy("createdAt", "desc"),
+      limit(limitCount)
+    );
+    
+    const querySnapshot = await getDocs(approvedRadiosQuery);
+    
+    const approvedRadios: ApprovedRadio[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      approvedRadios.push({
+        id: doc.id,
+        radioName: data.radioName,
+        streamUrl: data.streamUrl,
+        websiteUrl: data.websiteUrl || undefined,
+        logoUrl: data.logoUrl || undefined,
+        description: data.description,
+        approvedAt: data.createdAt.toDate()
+      });
+    });
+    
+    console.log(`Found ${approvedRadios.length} newly approved radios`);
+    return approvedRadios;
+  } catch (error) {
+    console.error("Error getting newly approved radios:", error);
     throw error;
   }
 }
