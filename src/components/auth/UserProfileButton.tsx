@@ -25,7 +25,8 @@ export const UserProfileButton = () => {
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" asChild>
           <Link to="/login">
-            <LogIn className="h-4 w-4 mr-1" /> Se connecter
+            <LogIn className="h-4 w-4 md:mr-1" /> 
+            <span className="hidden md:inline">Se connecter</span>
           </Link>
         </Button>
       </div>
@@ -37,7 +38,7 @@ export const UserProfileButton = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <User className="h-4 w-4" />
-          <span className="max-w-[100px] truncate">
+          <span className="hidden md:inline max-w-[100px] truncate">
             {currentUser?.displayName || currentUser?.email.split('@')[0]}
           </span>
         </Button>
