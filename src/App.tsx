@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import SuggestRadioPage from "./pages/SuggestRadioPage";
+import PendingRadiosPage from "./pages/PendingRadiosPage";
 import HistoryPage from "./pages/HistoryPage";
 import AdvertisingPage from "./pages/AdvertisingPage";
 import StationDetailsPage from "./pages/StationDetailsPage";
@@ -42,6 +43,7 @@ const App = () => {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/suggest-radio" element={<SuggestRadioPage />} />
+            <Route path="/pending-radios" element={<PendingRadiosPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/advertising" element={<AdvertisingPage />} />
             
@@ -59,6 +61,7 @@ const App = () => {
             <Route path="/a-propos" element={<Navigate to="/about" replace />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/suggerer-radio" element={<Navigate to="/suggest-radio" replace />} />
+            <Route path="/radios-en-attente" element={<Navigate to="/pending-radios" replace />} />
             <Route path="/historique" element={<Navigate to="/history" replace />} />
             <Route path="/publicite" element={<Navigate to="/advertising" replace />} />
             

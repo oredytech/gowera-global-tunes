@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Button } from './ui/button';
@@ -19,6 +20,9 @@ export const Footer = () => {
           </Link>
           <Link to="/suggest-radio" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Suggérer une radio
+          </Link>
+          <Link to="/pending-radios" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            En attente de validation
           </Link>
           <Link to="/history" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Historique

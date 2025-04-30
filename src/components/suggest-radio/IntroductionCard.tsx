@@ -13,8 +13,12 @@ export function IntroductionCard() {
           </p>
         </div>
         
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mb-2">
           Toutes les informations soumises seront enregistrées dans notre base de données et un email sera envoyé à notre équipe à <span className="font-medium">infosgowera@gmail.com</span>
+        </p>
+        
+        <p className="text-sm text-muted-foreground">
+          Après soumission, votre radio apparaîtra dans la section <span className="font-medium">"En attente de validation"</span> jusqu'à ce qu'un administrateur l'approuve.
         </p>
       </CardContent>
     </Card>
