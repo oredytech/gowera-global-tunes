@@ -7,11 +7,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AuthGuard } from "./components/auth/AuthGuard";
-import { AdminGuard } from "./components/auth/AdminGuard";
-import { AdminLayout } from "./components/admin/AdminLayout";
 
 import Home from "./pages/Home";
-import Index from "./pages/Index";
 import PopularStations from "./pages/PopularStations";
 import CountriesPage from "./pages/CountriesPage";
 import GenresPage from "./pages/GenresPage";
@@ -31,13 +28,6 @@ import ArticleDetailPage from "./pages/ArticleDetailPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 
-// Admin pages
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import AdminRadiosPage from "./pages/admin/AdminRadiosPage";
-import AdminAdvertisementsPage from "./pages/admin/AdminAdvertisementsPage";
-import AdminStatisticsPage from "./pages/admin/AdminStatisticsPage";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-
 const App = () => {
   return (
     <>
@@ -45,12 +35,9 @@ const App = () => {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            
-            {/* Main site routes */}
-            <Route element={<Layout />}>
-              <Route path="/home" element={<Home />} />
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
               <Route path="/news" element={<NewsPage />} />
               <Route path="/popular" element={<PopularStations />} />
               <Route path="/countries" element={<CountriesPage />} />
@@ -84,20 +71,10 @@ const App = () => {
               <Route path="/radios-en-attente" element={<Navigate to="/pending-radios" replace />} />
               <Route path="/historique" element={<Navigate to="/history" replace />} />
               <Route path="/publicite" element={<Navigate to="/advertising" replace />} />
-            </Route>
-            
-            {/* Admin routes */}
-            <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="radios" element={<AdminRadiosPage />} />
-              <Route path="advertisements" element={<AdminAdvertisementsPage />} />
-              <Route path="statistics" element={<AdminStatisticsPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-              <Route path="settings" element={<div>Paramètres du site</div>} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
         </AuthProvider>
       </TooltipProvider>
     </>
