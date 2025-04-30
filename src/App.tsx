@@ -36,6 +36,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminRadiosPage from "./pages/admin/AdminRadiosPage";
 import AdminAdvertisementsPage from "./pages/admin/AdminAdvertisementsPage";
 import AdminStatisticsPage from "./pages/admin/AdminStatisticsPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
 
 const App = () => {
   return (
@@ -91,7 +92,7 @@ const App = () => {
               <Route path="radios" element={<AdminRadiosPage />} />
               <Route path="advertisements" element={<AdminAdvertisementsPage />} />
               <Route path="statistics" element={<AdminStatisticsPage />} />
-              <Route path="users" element={<div>Gestion des utilisateurs</div>} />
+              <Route path="users" element={<AdminUsersPage />} />
               <Route path="settings" element={<div>Paramètres du site</div>} />
             </Route>
             

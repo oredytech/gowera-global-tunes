@@ -10,7 +10,7 @@ import {
   User as FirebaseUser
 } from "firebase/auth";
 import { app } from '../services/firebase';
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from '../services/firebase/config';
 
 type User = {
@@ -108,6 +108,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (displayName && userCredential.user) {
         await updateProfile(userCredential.user, { displayName });
       }
+      
+      // Create a user document in Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email: userCredential.user.email,
+        displayName: displayName || null,
+        isAdmin: false,
+        createdAt: serverTimestamp()
+      });
       
       const formattedUser = await formatUser(userCredential.user);
       setCurrentUser(formattedUser);
