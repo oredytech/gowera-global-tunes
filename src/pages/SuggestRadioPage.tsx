@@ -1,109 +1,30 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
-import { Radio, RadioTower, Mail, User, Phone, Star, AlertCircle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { saveRadioSuggestion, RadioSuggestion } from "@/services/firebaseService";
+import { RadioTower, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-const formSchema = z.object({
-  radioName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  streamUrl: z.string().url("L'URL de streaming doit être valide"),
-  websiteUrl: z.string().url("L'URL du site web doit être valide").optional(),
-  logoUrl: z.string().url("L'URL du logo doit être valide").optional(),
-  description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
-  contactEmail: z.string().email("L'email doit être valide"),
-  contactPhone: z.string().min(10, "Le numéro de téléphone doit être valide"),
-  senderEmail: z.string().email("Votre email doit être valide")
-});
-
-// Define a type based on the form schema
-type FormValues = z.infer<typeof formSchema>;
+import { toast } from "@/hooks/use-toast";
+import { IntroductionCard } from "@/components/suggest-radio/IntroductionCard";
+import { SuggestRadioForm, SuggestRadioFormValues } from "@/components/suggest-radio/SuggestRadioForm";
+import { SponsorDialog } from "@/components/suggest-radio/SponsorDialog";
 
 const SuggestRadioPage = () => {
   const [sponsorDialogOpen, setSponsorDialogOpen] = useState(false);
-  const [submittedValues, setSubmittedValues] = useState<FormValues | null>(null);
+  const [submittedValues, setSubmittedValues] = useState<SuggestRadioFormValues | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      radioName: "",
-      streamUrl: "",
-      websiteUrl: "",
-      logoUrl: "",
-      description: "",
-      contactEmail: "",
-      contactPhone: "",
-      senderEmail: ""
-    }
-  });
-
-  const onSubmit = async (values: FormValues) => {
-    // Réinitialiser le message d'erreur
-    setErrorMessage(null);
-    
-    try {
-      setIsSubmitting(true);
-      
-      // Prepare data for Firebase - ensure all required fields are present
-      const suggestionData: Omit<RadioSuggestion, "createdAt" | "sponsored"> = {
-        radioName: values.radioName,
-        streamUrl: values.streamUrl,
-        description: values.description,
-        contactEmail: values.contactEmail,
-        contactPhone: values.contactPhone,
-        senderEmail: values.senderEmail,
-        // Optional fields
-        websiteUrl: values.websiteUrl || undefined,
-        logoUrl: values.logoUrl || undefined
-      };
-      
-      // Enregistrer la suggestion dans Firebase
-      const docId = await saveRadioSuggestion(suggestionData);
-      setSubmissionId(docId);
-      
-      // Stocker les valeurs pour le dialogue de sponsoring
-      setSubmittedValues(values);
-      
-      // Ouvrir la boîte de dialogue de sponsoring
-      setSponsorDialogOpen(true);
-      
-      // Le toast de succès sera affiché uniquement si l'utilisateur ferme la boîte de dialogue
-      // sans choisir le sponsoring, ou après avoir géré le sponsoring
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
-      
-      // Gérer l'erreur de permissions Firebase
-      if (error.message && error.message.includes("Missing or insufficient permissions")) {
-        setErrorMessage("Nous rencontrons actuellement un problème d'accès à la base de données. Veuillez réessayer plus tard ou contacter l'administrateur.");
-      } else {
-        setErrorMessage(error.message || "Une erreur est survenue lors de l'envoi du formulaire.");
-      }
-      
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi du formulaire. Veuillez réessayer.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+  const handleSubmitSuccess = (values: SuggestRadioFormValues, docId: string) => {
+    setSubmissionId(docId);
+    setSubmittedValues(values);
+    setSponsorDialogOpen(true);
+  };
+  
+  const handleSubmitError = (error: Error) => {
+    // Gérer l'erreur de permissions Firebase
+    if (error.message && error.message.includes("Missing or insufficient permissions")) {
+      setErrorMessage("Nous rencontrons actuellement un problème d'accès à la base de données. Veuillez réessayer plus tard ou contacter l'administrateur.");
+    } else {
+      setErrorMessage(error.message || "Une erreur est survenue lors de l'envoi du formulaire.");
     }
   };
 
@@ -131,9 +52,6 @@ const SuggestRadioPage = () => {
       title: "Suggestion envoyée",
       description: "Nous examinerons votre suggestion dans les plus brefs délais."
     });
-    
-    // Réinitialiser le formulaire
-    form.reset();
   };
 
   return (
@@ -151,165 +69,20 @@ const SuggestRadioPage = () => {
         </Alert>
       )}
       
-      <Card className="mb-8">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3 text-muted-foreground mb-4">
-            <Radio className="h-5 w-5" />
-            <p>
-              Vous souhaitez ajouter votre radio sur GOWERA ? Remplissez ce formulaire et nous vous contacterons rapidement.
-            </p>
-          </div>
-          
-          <p className="text-sm text-muted-foreground">
-            Toutes les informations soumises seront enregistrées dans notre base de données et un email sera envoyé à notre équipe à <span className="font-medium">infosgowera@gmail.com</span>
-          </p>
-        </CardContent>
-      </Card>
+      <IntroductionCard />
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField control={form.control} name="radioName" render={({
-            field
-          }) => <FormItem>
-              <FormLabel>Nom de la radio</FormLabel>
-              <FormControl>
-                <Input placeholder="Radio Okapi" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>} />
-
-          <FormField control={form.control} name="streamUrl" render={({
-            field
-          }) => <FormItem>
-              <FormLabel>URL du flux streaming</FormLabel>
-              <FormControl>
-                <Input placeholder="https://stream.radiookapi.net/stream" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>} />
-
-          <FormField control={form.control} name="logoUrl" render={({
-            field
-          }) => <FormItem>
-              <FormLabel>URL du logo</FormLabel>
-              <FormControl>
-                <Input placeholder="https://www.example.com/logo.png" {...field} />
-              </FormControl>
-              <FormDescription>
-                Fournissez un lien vers le logo de votre radio (format PNG ou JPG recommandé)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>} />
-
-          <FormField control={form.control} name="websiteUrl" render={({
-            field
-          }) => <FormItem>
-              <FormLabel>Site web (optionnel)</FormLabel>
-              <FormControl>
-                <Input placeholder="https://www.radiookapi.net" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>} />
-
-          <FormField control={form.control} name="description" render={({
-            field
-          }) => <FormItem>
-              <FormLabel>Description de la radio</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Décrivez votre radio, son contenu, sa programmation..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>} />
-
-          <div className="p-4 border rounded-md bg-muted/50">
-            <h3 className="text-lg font-medium mb-4">Informations de contact de la radio</h3>
-            <div className="space-y-6">
-              <FormField control={form.control} name="contactEmail" render={({
-                field
-              }) => <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    Email de contact de la radio
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="contact@radiookapi.net" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
-
-              <FormField control={form.control} name="contactPhone" render={({
-                field
-              }) => <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    Téléphone de contact de la radio
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="+243 851 006 476" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
-            </div>
-          </div>
-
-          <FormField control={form.control} name="senderEmail" render={({
-            field
-          }) => <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Votre email pour être contacté
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="votre.email@example.com" {...field} />
-              </FormControl>
-              <FormDescription>
-                Nous utiliserons cette adresse pour vous informer de l'ajout de votre radio
-              </FormDescription>
-              <FormMessage />
-            </FormItem>} />
-
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Envoi en cours..." : "Soumettre la radio"}
-          </Button>
-        </form>
-      </Form>
+      <SuggestRadioForm 
+        onSubmitSuccess={handleSubmitSuccess} 
+        onSubmitError={handleSubmitError}
+      />
       
-      {/* Dialog de sponsoring */}
-      <Dialog open={sponsorDialogOpen} onOpenChange={setSponsorDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              Boostez votre visibilité sur GOWERA
-            </DialogTitle>
-            <DialogDescription>
-              Félicitations pour avoir suggéré votre radio ! Souhaitez-vous sponsoriser votre station pour une visibilité accrue auprès de notre audience ?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4 bg-muted/30 rounded-md border mb-2">
-            <h4 className="font-medium mb-2">Avantages du sponsoring :</h4>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-primary">✓</span> Placement prioritaire dans la liste des radios
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary">✓</span> Badge "Radio Sponsorisée" distinctif
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary">✓</span> Promotion sur nos réseaux sociaux et newsletters
-              </li>
-            </ul>
-          </div>
-          <DialogFooter className="flex sm:flex-row gap-2">
-            <Button variant="outline" onClick={handleDeclineSponsor} className="flex-1">
-              Pas maintenant
-            </Button>
-            <Button onClick={handleSponsorRadio} className="flex-1 bg-gradient-to-r from-primary to-primary/80">
-              Sponsoriser ma radio
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SponsorDialog 
+        open={sponsorDialogOpen} 
+        onOpenChange={setSponsorDialogOpen}
+        submittedValues={submittedValues}
+        onSponsorRadio={handleSponsorRadio}
+        onDeclineSponsor={handleDeclineSponsor}
+      />
     </div>
   );
 };
