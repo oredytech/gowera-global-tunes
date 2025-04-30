@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   getAuth, 
@@ -9,16 +10,20 @@ import {
   User as FirebaseUser
 } from "firebase/auth";
 import { app } from '../services/firebase';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from '../services/firebase/config';
 
 type User = {
   id: string;
   email: string;
   displayName?: string;
+  isAdmin?: boolean;
 };
 
 type AuthContextType = {
   currentUser: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, displayName?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -43,11 +48,23 @@ type AuthProviderProps = {
 const auth = getAuth(app);
 
 // Helper function to convert Firebase user to our User type
-const formatUser = (user: FirebaseUser): User => {
+const formatUser = async (user: FirebaseUser): Promise<User> => {
+  // Fetch additional user data from Firestore (for admin status)
+  let isAdmin = false;
+  try {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      isAdmin = userDoc.data()?.isAdmin === true;
+    }
+  } catch (error) {
+    console.error("Error fetching user admin status:", error);
+  }
+
   return {
     id: user.uid,
     email: user.email || '',
     displayName: user.displayName || undefined,
+    isAdmin
   };
 };
 
@@ -57,9 +74,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     // Set up authentication state listener
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setCurrentUser(formatUser(user));
+        const formattedUser = await formatUser(user);
+        setCurrentUser(formattedUser);
       } else {
         setCurrentUser(null);
       }
@@ -74,7 +92,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setCurrentUser(formatUser(userCredential.user));
+      const formattedUser = await formatUser(userCredential.user);
+      setCurrentUser(formattedUser);
     } finally {
       setLoading(false);
     }
@@ -90,7 +109,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         await updateProfile(userCredential.user, { displayName });
       }
       
-      setCurrentUser(formatUser(userCredential.user));
+      const formattedUser = await formatUser(userCredential.user);
+      setCurrentUser(formattedUser);
     } finally {
       setLoading(false);
     }
@@ -108,6 +128,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value = {
     currentUser,
     isAuthenticated: !!currentUser,
+    isAdmin: currentUser?.isAdmin || false,
     login,
     signup,
     logout,

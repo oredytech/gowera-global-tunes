@@ -7,6 +7,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AuthGuard } from "./components/auth/AuthGuard";
+import { AdminGuard } from "./components/auth/AdminGuard";
+import { AdminLayout } from "./components/admin/AdminLayout";
 
 import Home from "./pages/Home";
 import Index from "./pages/Index";
@@ -29,6 +31,12 @@ import ArticleDetailPage from "./pages/ArticleDetailPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 
+// Admin pages
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminRadiosPage from "./pages/admin/AdminRadiosPage";
+import AdminAdvertisementsPage from "./pages/admin/AdminAdvertisementsPage";
+import AdminStatisticsPage from "./pages/admin/AdminStatisticsPage";
+
 const App = () => {
   return (
     <>
@@ -39,6 +47,8 @@ const App = () => {
           {/* Use a conditional approach to show Layout for all routes except homepage */}
           <Routes>
             <Route path="/" element={<Index />} />
+            
+            {/* Main site routes */}
             <Route element={<Layout />}>
               <Route path="/home" element={<Home />} />
               <Route path="/news" element={<NewsPage />} />
@@ -74,9 +84,19 @@ const App = () => {
               <Route path="/radios-en-attente" element={<Navigate to="/pending-radios" replace />} />
               <Route path="/historique" element={<Navigate to="/history" replace />} />
               <Route path="/publicite" element={<Navigate to="/advertising" replace />} />
-              
-              <Route path="*" element={<NotFound />} />
             </Route>
+            
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="radios" element={<AdminRadiosPage />} />
+              <Route path="advertisements" element={<AdminAdvertisementsPage />} />
+              <Route path="statistics" element={<AdminStatisticsPage />} />
+              <Route path="users" element={<div>Gestion des utilisateurs</div>} />
+              <Route path="settings" element={<div>Paramètres du site</div>} />
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </TooltipProvider>

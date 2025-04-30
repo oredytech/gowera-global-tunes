@@ -9,10 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogIn, LogOut, User } from "lucide-react";
+import { LogIn, LogOut, User, Settings } from "lucide-react";
 
 export const UserProfileButton = () => {
-  const { currentUser, isAuthenticated, logout } = useAuth();
+  const { currentUser, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -47,6 +47,17 @@ export const UserProfileButton = () => {
         <DropdownMenuItem disabled className="opacity-70">
           {currentUser?.email}
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/admin">
+                <Settings className="h-4 w-4 mr-2" />
+                <span>Tableau de bord admin</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
           <LogOut className="h-4 w-4 mr-2" />
