@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { RadioStation } from '../services/radioApi';
 import { Heart } from 'lucide-react';
@@ -14,9 +15,19 @@ interface StationCardProps {
 
 export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const { playStation, currentStation, isPlaying } = useAudioPlayer();
-  const [favorite, setFavorite] = React.useState(isFavorite(station.stationuuid));
+  const [favorite, setFavorite] = useState<boolean>(false);
   
   const isPlaying_ = currentStation?.stationuuid === station.stationuuid && isPlaying;
+
+  // Vérifier si la station est un favori lors du chargement du composant
+  useEffect(() => {
+    const checkFavorite = async () => {
+      const isFav = await isFavorite(station.stationuuid);
+      setFavorite(isFav);
+    };
+    
+    checkFavorite();
+  }, [station.stationuuid]);
 
   const normalizeSlug = (name: string) => {
     return name
@@ -25,19 +36,24 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
       .replace(/^-+|-+$/g, '');
   };
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (favorite) {
-      removeFavorite(station.stationuuid);
-      toast.success(`${station.name} retiré des favoris`);
-    } else {
-      addFavorite(station.stationuuid);
-      toast.success(`${station.name} ajouté aux favoris`);
+    try {
+      if (favorite) {
+        await removeFavorite(station.stationuuid);
+        toast.success(`${station.name} retiré des favoris`);
+      } else {
+        await addFavorite(station.stationuuid);
+        toast.success(`${station.name} ajouté aux favoris`);
+      }
+      
+      setFavorite(!favorite);
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+      toast.error('Une erreur est survenue');
     }
-    
-    setFavorite(!favorite);
   };
 
   const stationImage = station.favicon && station.favicon !== '' 

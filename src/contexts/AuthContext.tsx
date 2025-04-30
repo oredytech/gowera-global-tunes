@@ -1,5 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  updateProfile,
+  User as FirebaseUser
+} from "firebase/auth";
+import { app } from '../services/firebaseService';
 
 type User = {
   id: string;
@@ -12,7 +22,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, displayName?: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 };
 
@@ -30,40 +40,42 @@ type AuthProviderProps = {
   children: ReactNode;
 };
 
+// Initialize Firebase Auth
+const auth = getAuth(app);
+
+// Helper function to convert Firebase user to our User type
+const formatUser = (user: FirebaseUser): User => {
+  return {
+    id: user.uid,
+    email: user.email || '',
+    displayName: user.displayName || undefined,
+  };
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem('gowera_user');
-    if (storedUser) {
-      try {
-        setCurrentUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('gowera_user');
+    // Set up authentication state listener
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(formatUser(user));
+      } else {
+        setCurrentUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+
+    // Clean up subscription
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Simulate authentication delay
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, we'll just create a user object
-      // In a real app, you would validate credentials against a backend
-      const user: User = {
-        id: crypto.randomUUID(),
-        email,
-        displayName: email.split('@')[0]
-      };
-      
-      setCurrentUser(user);
-      localStorage.setItem('gowera_user', JSON.stringify(user));
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setCurrentUser(formatUser(userCredential.user));
     } finally {
       setLoading(false);
     }
@@ -72,25 +84,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signup = async (email: string, password: string, displayName?: string) => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Create user (in a real app, this would interact with a backend)
-      const user: User = {
-        id: crypto.randomUUID(),
-        email,
-        displayName: displayName || email.split('@')[0]
-      };
+      // Update profile if displayName is provided
+      if (displayName && userCredential.user) {
+        await updateProfile(userCredential.user, { displayName });
+      }
       
-      setCurrentUser(user);
-      localStorage.setItem('gowera_user', JSON.stringify(user));
+      setCurrentUser(formatUser(userCredential.user));
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('gowera_user');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const value = {

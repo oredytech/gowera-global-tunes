@@ -1,46 +1,79 @@
 
 import { RadioStation } from './radioApi';
+import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebaseService';
+import { getAuth } from 'firebase/auth';
 
 const FAVORITES_KEY = 'gowera_favorites';
 
-export function getFavorites(): string[] {
+// Fonction pour obtenir les favoris locaux (pour les utilisateurs non authentifiés)
+function getLocalFavorites(): string[] {
   try {
     const favorites = localStorage.getItem(FAVORITES_KEY);
     return favorites ? JSON.parse(favorites) : [];
   } catch (error) {
-    console.error('Error getting favorites:', error);
+    console.error('Error getting local favorites:', error);
     return [];
   }
 }
 
-export function addFavorite(stationUuid: string): void {
-  try {
-    const favorites = getFavorites();
-    if (!favorites.includes(stationUuid)) {
-      favorites.push(stationUuid);
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+// Fonction pour obtenir les favoris (en tenant compte de l'authentification)
+export async function getFavorites(): Promise<string[]> {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  
+  if (currentUser) {
+    // Si l'utilisateur est connecté, récupérer les favoris depuis Firebase
+    return await getUserFavorites(currentUser.uid);
+  } else {
+    // Sinon, récupérer les favoris depuis le localStorage
+    return getLocalFavorites();
+  }
+}
+
+// Fonction pour ajouter un favori
+export async function addFavorite(stationUuid: string): Promise<void> {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  
+  if (currentUser) {
+    // Si l'utilisateur est connecté, ajouter le favori à Firebase
+    await saveFavorite(currentUser.uid, stationUuid);
+  } else {
+    // Sinon, ajouter le favori au localStorage
+    try {
+      const favorites = getLocalFavorites();
+      if (!favorites.includes(stationUuid)) {
+        favorites.push(stationUuid);
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+      }
+    } catch (error) {
+      console.error('Error adding local favorite:', error);
     }
-  } catch (error) {
-    console.error('Error adding favorite:', error);
   }
 }
 
-export function removeFavorite(stationUuid: string): void {
-  try {
-    const favorites = getFavorites();
-    const newFavorites = favorites.filter(id => id !== stationUuid);
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-  } catch (error) {
-    console.error('Error removing favorite:', error);
+// Fonction pour supprimer un favori
+export async function removeFavorite(stationUuid: string): Promise<void> {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  
+  if (currentUser) {
+    // Si l'utilisateur est connecté, supprimer le favori de Firebase
+    await removeFavoriteFromDb(currentUser.uid, stationUuid);
+  } else {
+    // Sinon, supprimer le favori du localStorage
+    try {
+      const favorites = getLocalFavorites();
+      const newFavorites = favorites.filter(id => id !== stationUuid);
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+    } catch (error) {
+      console.error('Error removing local favorite:', error);
+    }
   }
 }
 
-export function isFavorite(stationUuid: string): boolean {
-  try {
-    const favorites = getFavorites();
-    return favorites.includes(stationUuid);
-  } catch (error) {
-    console.error('Error checking favorite:', error);
-    return false;
-  }
+// Fonction pour vérifier si une station est un favori
+export async function isFavorite(stationUuid: string): Promise<boolean> {
+  const favorites = await getFavorites();
+  return favorites.includes(stationUuid);
 }
