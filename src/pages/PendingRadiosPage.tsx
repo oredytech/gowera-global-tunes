@@ -1,12 +1,23 @@
 
 import { useState, useEffect } from "react";
-import { RadioTower, Clock, AlertCircle } from "lucide-react";
+import { RadioTower, Clock, AlertCircle, Check } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { db } from "@/services/firebaseService";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { db, approveRadioSuggestion } from "@/services/firebaseService";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface PendingRadio {
   id: string;
@@ -24,40 +35,69 @@ const PendingRadiosPage = () => {
   const [pendingRadios, setPendingRadios] = useState<PendingRadio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRadio, setSelectedRadio] = useState<PendingRadio | null>(null);
+  const [approving, setApproving] = useState(false);
+  const { toast } = useToast();
+
+  const fetchPendingRadios = async () => {
+    try {
+      setLoading(true);
+      
+      // Créer une requête pour obtenir toutes les radios où sponsored est false
+      const radioQuery = query(
+        collection(db, "radioSuggestions"),
+        where("sponsored", "==", false)
+      );
+      
+      const querySnapshot = await getDocs(radioQuery);
+      
+      const radios: PendingRadio[] = [];
+      querySnapshot.forEach((doc) => {
+        radios.push({
+          id: doc.id,
+          ...doc.data()
+        } as PendingRadio);
+      });
+      
+      setPendingRadios(radios);
+      setError(null);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des radios en attente:", err);
+      setError("Impossible de charger les radios en attente. Veuillez réessayer plus tard.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPendingRadios = async () => {
-      try {
-        setLoading(true);
-        
-        // Créer une requête pour obtenir toutes les radios où sponsored est false
-        const radioQuery = query(
-          collection(db, "radioSuggestions"),
-          where("sponsored", "==", false)
-        );
-        
-        const querySnapshot = await getDocs(radioQuery);
-        
-        const radios: PendingRadio[] = [];
-        querySnapshot.forEach((doc) => {
-          radios.push({
-            id: doc.id,
-            ...doc.data()
-          } as PendingRadio);
-        });
-        
-        setPendingRadios(radios);
-        setError(null);
-      } catch (err) {
-        console.error("Erreur lors de la récupération des radios en attente:", err);
-        setError("Impossible de charger les radios en attente. Veuillez réessayer plus tard.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPendingRadios();
   }, []);
+
+  const handleApprove = async (radio: PendingRadio) => {
+    setSelectedRadio(null);
+    setApproving(true);
+    
+    try {
+      await approveRadioSuggestion(radio.id);
+      
+      // Rafraîchir la liste
+      fetchPendingRadios();
+      
+      toast({
+        title: "Radio approuvée",
+        description: `La radio "${radio.radioName}" a été approuvée avec succès.`,
+      });
+    } catch (err) {
+      console.error("Erreur lors de l'approbation de la radio:", err);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'approuver la radio. Veuillez réessayer plus tard.",
+      });
+    } finally {
+      setApproving(false);
+    }
+  };
 
   const formatDate = (timestamp: any) => {
     if (!timestamp || !timestamp.toDate) return "Date inconnue";
@@ -142,9 +182,45 @@ const PendingRadiosPage = () => {
                     )}
                   </div>
                   <Separator />
-                  <p className="text-xs text-muted-foreground">
-                    Suggérée le {formatDate(radio.createdAt)}
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-xs text-muted-foreground">
+                      Suggérée le {formatDate(radio.createdAt)}
+                    </p>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-green-500 border-green-500 hover:bg-green-50 hover:text-green-600"
+                          onClick={() => setSelectedRadio(radio)}
+                        >
+                          <Check className="mr-1 h-4 w-4" /> Valider
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmer la validation</DialogTitle>
+                          <DialogDescription>
+                            Voulez-vous vraiment valider la radio "{selectedRadio?.radioName}" ? Une fois validée, elle sera visible dans la liste principale des radios.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setSelectedRadio(null)}
+                          >
+                            Annuler
+                          </Button>
+                          <Button 
+                            onClick={() => selectedRadio && handleApprove(selectedRadio)} 
+                            disabled={approving}
+                          >
+                            {approving ? 'Validation en cours...' : 'Confirmer la validation'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
               </CardContent>
             </Card>

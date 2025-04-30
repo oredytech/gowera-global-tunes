@@ -1,7 +1,7 @@
 
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, addDoc, Timestamp } from "firebase/firestore";
+import { getFirestore, collection, addDoc, Timestamp, doc, updateDoc } from "firebase/firestore";
 
 // Configuration Firebase
 const firebaseConfig = {
@@ -60,6 +60,24 @@ export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "cre
     return docRef.id;
   } catch (error) {
     console.error("Error saving radio suggestion:", error);
+    throw error;
+  }
+}
+
+// Fonction pour approuver une suggestion de radio
+export async function approveRadioSuggestion(suggestionId: string): Promise<void> {
+  try {
+    const suggestionRef = doc(db, "radioSuggestions", suggestionId);
+    await updateDoc(suggestionRef, {
+      sponsored: true
+    });
+    
+    console.log(`Radio suggestion with ID ${suggestionId} has been approved`);
+    
+    // Ici, vous pourriez également ajouter cette radio à une collection "radios" principale
+    // avec plus de logique métier selon vos besoins
+  } catch (error) {
+    console.error("Error approving radio suggestion:", error);
     throw error;
   }
 }
