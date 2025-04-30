@@ -39,9 +39,7 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       lastcheckoktime: '',
       clicktimestamp: '',
       clickcount: 0,
-      clicktrend: 0,
-      // Remove geo_lat and geo_long as they don't exist in RadioStation
-      has_extended_info: false
+      clicktrend: 0
     });
   };
 

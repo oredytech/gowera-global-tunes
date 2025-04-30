@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +10,7 @@ import { Mail, Phone, User, Globe, Tag, Music } from "lucide-react";
 import { RadioSuggestion, saveRadioSuggestion } from "@/services/firebaseService";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 // Form schema definition
 const formSchema = z.object({
