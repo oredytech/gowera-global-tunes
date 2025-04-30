@@ -14,15 +14,38 @@ interface NewRadioCardProps {
 }
 
 export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
-  const { playStream, currentStream, isPlaying } = useAudioPlayer();
+  const { playStation, currentStation, isPlaying } = useAudioPlayer();
   const [favorite, setFavorite] = React.useState(false);
   
   // Convert ApprovedRadio to format expected by AudioPlayer
   const handlePlay = () => {
-    playStream(radio.streamUrl, {
-      title: radio.radioName,
-      imageUrl: radio.logoUrl || placeholderImage,
-      url: radio.websiteUrl || ''
+    // Create a RadioStation object that the playStation function expects
+    playStation({
+      changeuuid: radio.id,
+      stationuuid: radio.id,
+      name: radio.radioName,
+      url: radio.streamUrl,
+      url_resolved: radio.streamUrl,
+      favicon: radio.logoUrl || placeholderImage,
+      homepage: radio.websiteUrl || '',
+      country: radio.country || '',
+      countrycode: '',
+      state: '',
+      language: '',
+      tags: radio.tags || '',
+      votes: 0,
+      codec: '',
+      bitrate: 0,
+      lastcheckok: true,
+      lastchecktime: '',
+      lastcheckoktime: '',
+      clicktimestamp: '',
+      clickcount: 0,
+      clicktrend: 0,
+      ssl_error: 0,
+      geo_lat: null,
+      geo_long: null,
+      has_extended_info: false
     });
   };
 
@@ -43,7 +66,7 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
     setFavorite(!favorite);
   };
 
-  const isCurrentlyPlaying = currentStream === radio.streamUrl && isPlaying;
+  const isCurrentlyPlaying = currentStation?.url_resolved === radio.streamUrl && isPlaying;
   const radioImage = radio.logoUrl && radio.logoUrl !== '' 
     ? radio.logoUrl 
     : placeholderImage;
