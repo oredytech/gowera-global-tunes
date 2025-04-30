@@ -4,7 +4,8 @@ import { RadioTower, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { IntroductionCard } from "@/components/suggest-radio/IntroductionCard";
-import { SuggestRadioForm, SuggestRadioFormValues } from "@/components/suggest-radio/SuggestRadioForm";
+import { SuggestRadioForm } from "@/components/suggest-radio/SuggestRadioForm";
+import { SuggestRadioFormValues } from "@/components/suggest-radio/RadioFormSchema";
 import { SponsorDialog } from "@/components/suggest-radio/SponsorDialog";
 
 const SuggestRadioPage = () => {

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { SuggestRadioFormValues } from "./SuggestRadioForm";
+import { SuggestRadioFormValues } from "./RadioFormSchema";
 
 interface SponsorDialogProps {
   open: boolean;
