@@ -41,6 +41,8 @@ export interface ApprovedRadio {
   logoUrl?: string;
   description: string;
   approvedAt: Date;
+  country?: string;  // Add optional country property
+  tags?: string;     // Add optional tags property
 }
 
 // Fonction pour enregistrer une suggestion de radio
@@ -127,7 +129,9 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
         websiteUrl: data.websiteUrl || undefined,
         logoUrl: data.logoUrl || undefined,
         description: data.description,
-        approvedAt: data.createdAt.toDate()
+        approvedAt: data.createdAt.toDate(),
+        country: data.country || undefined,
+        tags: data.tags || undefined
       });
     });
     

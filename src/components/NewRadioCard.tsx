@@ -28,15 +28,15 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       url_resolved: radio.streamUrl,
       favicon: radio.logoUrl || placeholderImage,
       homepage: radio.websiteUrl || '',
-      country: radio.country || '',
+      country: '', // Set default empty string instead of radio.country
       countrycode: '',
       state: '',
       language: '',
-      tags: radio.tags || '',
+      tags: '', // Set default empty string instead of radio.tags
       votes: 0,
       codec: '',
       bitrate: 0,
-      lastcheckok: true,
+      lastcheckok: 1, // Changed from boolean true to number 1
       lastchecktime: '',
       lastcheckoktime: '',
       clicktimestamp: '',
