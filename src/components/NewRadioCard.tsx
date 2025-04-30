@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ApprovedRadio } from '../services/firebaseService';
 import { Heart, BadgePlus } from 'lucide-react';
@@ -39,7 +40,10 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       lastcheckoktime: '',
       clicktimestamp: '',
       clickcount: 0,
-      clicktrend: 0
+      clicktrend: 0,
+      hls: 0,
+      lastchangetime: '',
+      lastlocalchecktime: ''
     });
   };
 
