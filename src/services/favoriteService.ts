@@ -5,6 +5,11 @@ import { getAuth } from 'firebase/auth';
 
 const FAVORITES_KEY = 'gowera_favorites';
 
+// Fonction pour émettre un événement de mise à jour des favoris
+function emitFavoritesUpdated() {
+  window.dispatchEvent(new Event('favoritesUpdated'));
+}
+
 // Fonction pour obtenir les favoris locaux (pour les utilisateurs non authentifiés)
 function getLocalFavorites(): string[] {
   try {
@@ -50,6 +55,9 @@ export async function addFavorite(stationUuid: string): Promise<void> {
       console.error('Error adding local favorite:', error);
     }
   }
+  
+  // Émettre un événement pour notifier les composants du changement
+  emitFavoritesUpdated();
 }
 
 // Fonction pour supprimer un favori
@@ -70,6 +78,9 @@ export async function removeFavorite(stationUuid: string): Promise<void> {
       console.error('Error removing local favorite:', error);
     }
   }
+  
+  // Émettre un événement pour notifier les composants du changement
+  emitFavoritesUpdated();
 }
 
 // Fonction pour vérifier si une station est un favori
