@@ -36,11 +36,22 @@ export interface RadioSuggestion {
 // Fonction pour enregistrer une suggestion de radio
 export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "createdAt" | "sponsored">): Promise<string> {
   try {
+    // Ajouter des logs pour déboguer
+    console.log("Début de saveRadioSuggestion avec les données :", suggestion);
+    
+    // Vérifier si les données requises sont présentes
+    if (!suggestion.radioName || !suggestion.streamUrl || !suggestion.description || 
+        !suggestion.contactEmail || !suggestion.contactPhone || !suggestion.senderEmail) {
+      throw new Error("Des champs obligatoires sont manquants");
+    }
+    
     const docRef = await addDoc(collection(db, "radioSuggestions"), {
       ...suggestion,
       sponsored: false,
       createdAt: Timestamp.now()
     });
+    
+    console.log("Document ajouté avec ID: ", docRef.id);
     
     // Envoyer un email à l'administrateur (à implémenter plus tard avec Firebase Functions)
     // Ceci est simplement simulé pour le moment

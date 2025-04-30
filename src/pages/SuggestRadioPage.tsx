@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -7,7 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Radio, RadioTower, Mail, User, Phone, Star } from "lucide-react";
+import { Radio, RadioTower, Mail, User, Phone, Star, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import {
@@ -19,6 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { saveRadioSuggestion, RadioSuggestion } from "@/services/firebaseService";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   radioName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -39,6 +39,7 @@ const SuggestRadioPage = () => {
   const [submittedValues, setSubmittedValues] = useState<FormValues | null>(null);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,6 +56,9 @@ const SuggestRadioPage = () => {
   });
 
   const onSubmit = async (values: FormValues) => {
+    // Réinitialiser le message d'erreur
+    setErrorMessage(null);
+    
     try {
       setIsSubmitting(true);
       
@@ -83,8 +87,16 @@ const SuggestRadioPage = () => {
       
       // Le toast de succès sera affiché uniquement si l'utilisateur ferme la boîte de dialogue
       // sans choisir le sponsoring, ou après avoir géré le sponsoring
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error);
+      
+      // Gérer l'erreur de permissions Firebase
+      if (error.message && error.message.includes("Missing or insufficient permissions")) {
+        setErrorMessage("Nous rencontrons actuellement un problème d'accès à la base de données. Veuillez réessayer plus tard ou contacter l'administrateur.");
+      } else {
+        setErrorMessage(error.message || "Une erreur est survenue lors de l'envoi du formulaire.");
+      }
+      
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi du formulaire. Veuillez réessayer.",
@@ -130,6 +142,14 @@ const SuggestRadioPage = () => {
         <RadioTower className="h-8 w-8 text-primary" />
         <h1 className="font-bold text-2xl">Suggérer une Radio</h1>
       </div>
+      
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
       
       <Card className="mb-8">
         <CardContent className="pt-6">
