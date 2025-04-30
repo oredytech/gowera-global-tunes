@@ -7,8 +7,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Radio, RadioTower, Mail, User, Phone } from "lucide-react";
+import { Radio, RadioTower, Mail, User, Phone, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   radioName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -22,6 +31,9 @@ const formSchema = z.object({
 });
 
 const SuggestRadioPage = () => {
+  const [sponsorDialogOpen, setSponsorDialogOpen] = useState(false);
+  const [submittedValues, setSubmittedValues] = useState<z.infer<typeof formSchema> | null>(null);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,10 +56,11 @@ const SuggestRadioPage = () => {
       // Simulation d'envoi d'email (dans un projet réel, cela serait fait par une API backend)
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast({
-        title: "Suggestion envoyée",
-        description: "Nous examinerons votre suggestion dans les plus brefs délais."
-      });
+      setSubmittedValues(values);
+      setSponsorDialogOpen(true);
+      
+      // Le toast de succès sera affiché uniquement si l'utilisateur ferme la boîte de dialogue
+      // sans choisir le sponsoring, ou après avoir géré le sponsoring
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -56,6 +69,32 @@ const SuggestRadioPage = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleSponsorRadio = () => {
+    // Ici, vous implémenteriez la logique pour rediriger vers une page de paiement
+    console.log("User chose to sponsor radio:", submittedValues?.radioName);
+    
+    // Fermer la boîte de dialogue
+    setSponsorDialogOpen(false);
+    
+    toast({
+      title: "Redirection vers le paiement",
+      description: "Vous allez être redirigé vers notre page de paiement pour sponsoriser votre radio."
+    });
+    
+    // Simuler une redirection (à remplacer par votre logique de redirection réelle)
+    // window.location.href = "/payment";
+  };
+
+  const handleDeclineSponsor = () => {
+    // Fermer la boîte de dialogue
+    setSponsorDialogOpen(false);
+    
+    toast({
+      title: "Suggestion envoyée",
+      description: "Nous examinerons votre suggestion dans les plus brefs délais."
+    });
   };
 
   return (
@@ -187,6 +226,43 @@ const SuggestRadioPage = () => {
           </Button>
         </form>
       </Form>
+      
+      {/* Dialog de sponsoring */}
+      <Dialog open={sponsorDialogOpen} onOpenChange={setSponsorDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Boostez votre visibilité sur GOWERA
+            </DialogTitle>
+            <DialogDescription>
+              Félicitations pour avoir suggéré votre radio ! Souhaitez-vous sponsoriser votre station pour une visibilité accrue auprès de notre audience ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4 bg-muted/30 rounded-md border mb-2">
+            <h4 className="font-medium mb-2">Avantages du sponsoring :</h4>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-primary">✓</span> Placement prioritaire dans la liste des radios
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">✓</span> Badge "Radio Sponsorisée" distinctif
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">✓</span> Promotion sur nos réseaux sociaux et newsletters
+              </li>
+            </ul>
+          </div>
+          <DialogFooter className="flex sm:flex-row gap-2">
+            <Button variant="outline" onClick={handleDeclineSponsor} className="flex-1">
+              Pas maintenant
+            </Button>
+            <Button onClick={handleSponsorRadio} className="flex-1 bg-gradient-to-r from-primary to-primary/80">
+              Sponsoriser ma radio
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
