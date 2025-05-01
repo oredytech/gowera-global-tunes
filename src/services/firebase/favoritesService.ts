@@ -12,6 +12,8 @@ export async function saveFavorite(userId: string, stationId: string): Promise<v
       return;
     }
     
+    console.log(`Tentative d'ajout du favori: ${stationId} pour l'utilisateur ${userId}`);
+    
     // Générer un ID unique basé sur l'ID station pour éviter les doublons
     const favoriteRef = doc(db, "favorites", `${userId}_${stationId}`);
     
@@ -21,7 +23,7 @@ export async function saveFavorite(userId: string, stationId: string): Promise<v
       addedAt: Timestamp.now()
     });
     
-    console.log(`Favori ajouté: ${stationId} pour l'utilisateur ${userId}`);
+    console.log(`Favori ajouté avec succès: ${stationId} pour l'utilisateur ${userId}`);
   } catch (error) {
     console.error("Error saving favorite:", error);
     toast.error("Impossible d'ajouter aux favoris. Veuillez réessayer plus tard.");
@@ -63,11 +65,13 @@ export async function removeFavoriteFromDb(userId: string, stationId: string): P
   try {
     if (!userId) return;
     
+    console.log(`Tentative de suppression du favori: ${stationId} pour l'utilisateur ${userId}`);
+    
     // Utiliser l'ID composé pour retrouver le document
     const favoriteRef = doc(db, "favorites", `${userId}_${stationId}`);
     await deleteDoc(favoriteRef);
     
-    console.log(`Favori supprimé: ${stationId} pour l'utilisateur ${userId}`);
+    console.log(`Favori supprimé avec succès: ${stationId} pour l'utilisateur ${userId}`);
   } catch (error) {
     console.error("Error removing favorite:", error);
     toast.error("Impossible de supprimer ce favori. Veuillez réessayer plus tard.");

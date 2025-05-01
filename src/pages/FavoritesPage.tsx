@@ -18,9 +18,13 @@ const FavoritesPage = () => {
     queryKey: ['favoriteIds', currentUser?.id],
     queryFn: getFavorites,
     meta: {
-      onError: (error: Error) => {
-        console.error("Erreur lors de la récupération des favoris:", error);
-        toast.error("Impossible de récupérer vos favoris. Veuillez réessayer plus tard.");
+      onSettled: (data: string[] | undefined, error: Error | null) => {
+        if (error) {
+          console.error("Erreur lors de la récupération des favoris:", error);
+          toast.error("Impossible de récupérer vos favoris. Veuillez réessayer plus tard.");
+        } else if (data) {
+          console.log(`${data.length} favoris récupérés:`, data);
+        }
       }
     }
   });
@@ -30,7 +34,10 @@ const FavoritesPage = () => {
     queryKey: ['favoriteStations', favoriteIds],
     queryFn: async () => {
       // Si aucun favori, retourner un tableau vide
-      if (favoriteIds.length === 0) return [];
+      if (favoriteIds.length === 0) {
+        console.log("Aucun favori trouvé");
+        return [];
+      }
       
       try {
         console.log(`Récupération de ${favoriteIds.length} stations favorites`);
@@ -73,6 +80,13 @@ const FavoritesPage = () => {
     setFavoriteStations(stations);
     setIsLoading(isLoadingIds || isLoadingStations);
   }, [stations, isLoadingIds, isLoadingStations]);
+
+  console.log("Rendu de la page Favoris:", { 
+    currentUser: currentUser?.id, 
+    favoriteIds: favoriteIds.length, 
+    favoriteStations: favoriteStations.length, 
+    isLoading 
+  });
 
   return (
     <div className="space-y-8">

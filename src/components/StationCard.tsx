@@ -8,6 +8,7 @@ import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { isFavorite, addFavorite, removeFavorite } from '../services/favoriteService';
 import { toast } from 'sonner';
 import placeholderImage from '/placeholder.svg';
+import { useAuth } from '../contexts/AuthContext';
 
 interface StationCardProps {
   station: RadioStation;
@@ -17,6 +18,7 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const { playStation, currentStation, isPlaying } = useAudioPlayer();
   const [favorite, setFavorite] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const { currentUser } = useAuth();
   
   const isPlaying_ = currentStation?.stationuuid === station.stationuuid && isPlaying;
 
@@ -59,6 +61,9 @@ export const StationCard: React.FC<StationCardProps> = ({ station }) => {
     setIsProcessing(true);
     
     try {
+      console.log(`Clic sur favori pour ${station.name} (${station.stationuuid}). État actuel: ${favorite ? 'favori' : 'non favori'}`);
+      console.log(`Utilisateur connecté: ${currentUser ? currentUser.id : 'non connecté'}`);
+      
       if (favorite) {
         await removeFavorite(station.stationuuid);
         toast.success(`${station.name} retiré des favoris`);

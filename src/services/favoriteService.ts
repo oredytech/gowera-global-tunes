@@ -8,6 +8,7 @@ const FAVORITES_KEY = 'gowera_favorites';
 
 // Fonction pour émettre un événement de mise à jour des favoris
 function emitFavoritesUpdated() {
+  console.log("Émission de l'événement favoritesUpdated");
   window.dispatchEvent(new Event('favoritesUpdated'));
 }
 
@@ -39,6 +40,7 @@ export async function getFavorites(): Promise<string[]> {
     }
   } else {
     // Sinon, récupérer les favoris depuis le localStorage
+    console.log("Utilisateur non connecté, récupération des favoris locaux");
     return getLocalFavorites();
   }
 }
@@ -48,9 +50,12 @@ export async function addFavorite(stationUuid: string): Promise<void> {
   const auth = getAuth();
   const currentUser = auth.currentUser;
   
+  console.log("Tentative d'ajout d'un favori:", stationUuid, "Utilisateur connecté:", !!currentUser);
+  
   if (currentUser) {
     // Si l'utilisateur est connecté, ajouter le favori à Firebase
     try {
+      console.log(`Ajout du favori pour ${currentUser.uid}: ${stationUuid} dans Firebase`);
       await saveFavorite(currentUser.uid, stationUuid);
       console.log(`Favori ajouté pour ${currentUser.uid}: ${stationUuid}`);
       // Émettre un événement pour notifier les composants du changement
@@ -85,9 +90,12 @@ export async function removeFavorite(stationUuid: string): Promise<void> {
   const auth = getAuth();
   const currentUser = auth.currentUser;
   
+  console.log("Tentative de suppression d'un favori:", stationUuid, "Utilisateur connecté:", !!currentUser);
+  
   if (currentUser) {
     // Si l'utilisateur est connecté, supprimer le favori de Firebase
     try {
+      console.log(`Suppression du favori pour ${currentUser.uid}: ${stationUuid} dans Firebase`);
       await removeFavoriteFromDb(currentUser.uid, stationUuid);
       console.log(`Favori supprimé pour ${currentUser.uid}: ${stationUuid}`);
       emitFavoritesUpdated();
