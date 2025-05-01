@@ -16,7 +16,21 @@ const FavoritesPage = () => {
   // Utiliser React Query pour récupérer les IDs des favoris
   const { data: favoriteIds = [], isLoading: isLoadingIds, refetch } = useQuery({
     queryKey: ['favoriteIds', currentUser?.id],
-    queryFn: getFavorites,
+    queryFn: async () => {
+      console.log("Récupération des IDs de favoris, utilisateur connecté:", !!currentUser);
+      if (currentUser) {
+        console.log("ID utilisateur:", currentUser.id);
+      }
+      try {
+        const favorites = await getFavorites();
+        console.log(`${favorites.length} favoris récupérés:`, favorites);
+        return favorites;
+      } catch (error) {
+        console.error("Erreur lors de la récupération des favoris:", error);
+        toast.error("Impossible de récupérer vos favoris. Veuillez réessayer plus tard.");
+        return [];
+      }
+    },
     meta: {
       onSettled: (data: string[] | undefined, error: Error | null) => {
         if (error) {

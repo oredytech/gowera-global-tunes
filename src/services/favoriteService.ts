@@ -32,7 +32,28 @@ export async function getFavorites(): Promise<string[]> {
     // Si l'utilisateur est connecté, récupérer les favoris depuis Firebase
     try {
       console.log(`Tentative de récupération des favoris pour ${currentUser.uid}`);
-      return await getUserFavorites(currentUser.uid);
+      const firebaseFavorites = await getUserFavorites(currentUser.uid);
+      console.log(`Favoris Firebase récupérés: ${firebaseFavorites.length} favoris`);
+      
+      // Si aucun favori n'est trouvé dans Firebase et qu'il y a des favoris locaux,
+      // nous pouvons les migrer vers Firebase
+      if (firebaseFavorites.length === 0) {
+        const localFavorites = getLocalFavorites();
+        if (localFavorites.length > 0) {
+          console.log(`Migration de ${localFavorites.length} favoris locaux vers Firebase`);
+          for (const stationId of localFavorites) {
+            try {
+              await saveFavorite(currentUser.uid, stationId);
+            } catch (error) {
+              console.error(`Erreur lors de la migration du favori ${stationId}:`, error);
+            }
+          }
+          // Après migration, récupérer à nouveau les favoris depuis Firebase
+          return await getUserFavorites(currentUser.uid);
+        }
+      }
+      
+      return firebaseFavorites;
     } catch (error) {
       console.error('Error getting Firebase favorites:', error);
       toast.error("Impossible de récupérer vos favoris. Utilisation des favoris locaux.");
