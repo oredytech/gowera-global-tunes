@@ -17,9 +17,11 @@ const FavoritesPage = () => {
   const { data: favoriteIds = [], isLoading: isLoadingIds, refetch } = useQuery({
     queryKey: ['favoriteIds', currentUser?.id],
     queryFn: getFavorites,
-    onError: (error) => {
-      console.error("Erreur lors de la récupération des favoris:", error);
-      toast.error("Impossible de récupérer vos favoris. Veuillez réessayer plus tard.");
+    meta: {
+      onError: (error: Error) => {
+        console.error("Erreur lors de la récupération des favoris:", error);
+        toast.error("Impossible de récupérer vos favoris. Veuillez réessayer plus tard.");
+      }
     }
   });
   
