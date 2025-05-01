@@ -33,6 +33,7 @@ const FavoritesPage = () => {
       if (favoriteIds.length === 0) return [];
       
       try {
+        console.log(`Récupération de ${favoriteIds.length} stations favorites`);
         // Récupérer toutes les stations en parallèle
         const stationPromises = favoriteIds.map(id => getStationByUuid(id));
         const results = await Promise.allSettled(stationPromises);
@@ -43,6 +44,7 @@ const FavoritesPage = () => {
           .map(result => (result as PromiseFulfilledResult<RadioStation | null>).value)
           .filter(station => station !== null) as RadioStation[];
           
+        console.log(`${successfulResults.length} stations favorites récupérées avec succès`);
         return successfulResults;
       } catch (error) {
         console.error("Erreur lors de la récupération des stations:", error);
@@ -56,6 +58,7 @@ const FavoritesPage = () => {
   // Écouter les événements de mise à jour des favoris
   useEffect(() => {
     const handleFavoritesUpdated = () => {
+      console.log("Événement favoritesUpdated détecté, rafraîchissement des données");
       refetch();
     };
     
@@ -65,6 +68,7 @@ const FavoritesPage = () => {
     };
   }, [refetch]);
   
+  // Mettre à jour l'état local lorsque les données de la requête changent
   useEffect(() => {
     setFavoriteStations(stations);
     setIsLoading(isLoadingIds || isLoadingStations);

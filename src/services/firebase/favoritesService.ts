@@ -1,5 +1,5 @@
 
-import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, setDoc } from "firebase/firestore";
+import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "./config";
 import { getAuth } from "firebase/auth";
 import { toast } from "sonner";
@@ -8,13 +8,15 @@ import { toast } from "sonner";
 export async function saveFavorite(userId: string, stationId: string): Promise<void> {
   try {
     // Générer un ID unique basé sur l'ID station pour éviter les doublons
-    const favoriteId = `${stationId}`;
-    const favoriteRef = doc(db, "users", userId, "favorites", favoriteId);
+    const favoriteRef = doc(db, "favorites", `${userId}_${stationId}`);
     
     await setDoc(favoriteRef, {
+      userId,
       stationId,
       addedAt: Timestamp.now()
     });
+    
+    console.log(`Favori ajouté: ${stationId} pour l'utilisateur ${userId}`);
   } catch (error) {
     console.error("Error saving favorite:", error);
     toast.error("Impossible d'ajouter aux favoris. Veuillez réessayer plus tard.");
@@ -25,17 +27,24 @@ export async function saveFavorite(userId: string, stationId: string): Promise<v
 // Fonction pour récupérer les favoris d'un utilisateur
 export async function getUserFavorites(userId: string): Promise<string[]> {
   try {
-    const favoritesRef = collection(db, "users", userId, "favorites");
-    const querySnapshot = await getDocs(favoritesRef);
+    if (!userId) {
+      console.log("Aucun ID utilisateur fourni pour récupérer les favoris");
+      return [];
+    }
+    
+    console.log(`Récupération des favoris pour l'utilisateur: ${userId}`);
+    const q = query(collection(db, "favorites"), where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
     
     const favorites: string[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      if (!data.deleted) {
+      if (data.stationId) {
         favorites.push(data.stationId);
       }
     });
     
+    console.log(`Favoris récupérés: ${favorites.length} stations`);
     return favorites;
   } catch (error) {
     console.error("Error getting user favorites:", error);
@@ -47,14 +56,13 @@ export async function getUserFavorites(userId: string): Promise<string[]> {
 // Fonction pour supprimer un favori
 export async function removeFavoriteFromDb(userId: string, stationId: string): Promise<void> {
   try {
-    // Utiliser directement l'ID de document basé sur l'ID de la station
-    const favoriteId = `${stationId}`;
-    const favoriteRef = doc(db, "users", userId, "favorites", favoriteId);
+    if (!userId) return;
     
-    await updateDoc(favoriteRef, {
-      deleted: true,
-      deletedAt: Timestamp.now()
-    });
+    // Utiliser l'ID composé pour retrouver le document
+    const favoriteRef = doc(db, "favorites", `${userId}_${stationId}`);
+    await deleteDoc(favoriteRef);
+    
+    console.log(`Favori supprimé: ${stationId} pour l'utilisateur ${userId}`);
   } catch (error) {
     console.error("Error removing favorite:", error);
     toast.error("Impossible de supprimer ce favori. Veuillez réessayer plus tard.");

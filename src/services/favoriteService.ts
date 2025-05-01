@@ -30,6 +30,7 @@ export async function getFavorites(): Promise<string[]> {
   if (currentUser) {
     // Si l'utilisateur est connecté, récupérer les favoris depuis Firebase
     try {
+      console.log(`Tentative de récupération des favoris pour ${currentUser.uid}`);
       return await getUserFavorites(currentUser.uid);
     } catch (error) {
       console.error('Error getting Firebase favorites:', error);
@@ -51,6 +52,7 @@ export async function addFavorite(stationUuid: string): Promise<void> {
     // Si l'utilisateur est connecté, ajouter le favori à Firebase
     try {
       await saveFavorite(currentUser.uid, stationUuid);
+      console.log(`Favori ajouté pour ${currentUser.uid}: ${stationUuid}`);
     } catch (error) {
       console.error('Error adding Firebase favorite:', error);
       // Fallback: ajouter au localStorage si Firebase échoue
@@ -86,6 +88,7 @@ export async function removeFavorite(stationUuid: string): Promise<void> {
     // Si l'utilisateur est connecté, supprimer le favori de Firebase
     try {
       await removeFavoriteFromDb(currentUser.uid, stationUuid);
+      console.log(`Favori supprimé pour ${currentUser.uid}: ${stationUuid}`);
     } catch (error) {
       console.error('Error removing Firebase favorite:', error);
       // Fallback: supprimer du localStorage si Firebase échoue
