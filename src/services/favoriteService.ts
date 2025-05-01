@@ -1,6 +1,6 @@
 
 import { RadioStation } from './radioApi';
-import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebase';
+import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebase/favoritesService';
 import { getAuth } from 'firebase/auth';
 import { toast } from "sonner";
 
@@ -53,6 +53,8 @@ export async function addFavorite(stationUuid: string): Promise<void> {
     try {
       await saveFavorite(currentUser.uid, stationUuid);
       console.log(`Favori ajouté pour ${currentUser.uid}: ${stationUuid}`);
+      // Émettre un événement pour notifier les composants du changement
+      emitFavoritesUpdated();
     } catch (error) {
       console.error('Error adding Firebase favorite:', error);
       // Fallback: ajouter au localStorage si Firebase échoue
@@ -60,6 +62,7 @@ export async function addFavorite(stationUuid: string): Promise<void> {
       if (!favorites.includes(stationUuid)) {
         favorites.push(stationUuid);
         localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+        emitFavoritesUpdated();
       }
     }
   } else {
@@ -69,14 +72,12 @@ export async function addFavorite(stationUuid: string): Promise<void> {
       if (!favorites.includes(stationUuid)) {
         favorites.push(stationUuid);
         localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+        emitFavoritesUpdated();
       }
     } catch (error) {
       console.error('Error adding local favorite:', error);
     }
   }
-  
-  // Émettre un événement pour notifier les composants du changement
-  emitFavoritesUpdated();
 }
 
 // Fonction pour supprimer un favori
@@ -89,12 +90,14 @@ export async function removeFavorite(stationUuid: string): Promise<void> {
     try {
       await removeFavoriteFromDb(currentUser.uid, stationUuid);
       console.log(`Favori supprimé pour ${currentUser.uid}: ${stationUuid}`);
+      emitFavoritesUpdated();
     } catch (error) {
       console.error('Error removing Firebase favorite:', error);
       // Fallback: supprimer du localStorage si Firebase échoue
       const favorites = getLocalFavorites();
       const newFavorites = favorites.filter(id => id !== stationUuid);
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+      emitFavoritesUpdated();
     }
   } else {
     // Sinon, supprimer le favori du localStorage
@@ -102,13 +105,11 @@ export async function removeFavorite(stationUuid: string): Promise<void> {
       const favorites = getLocalFavorites();
       const newFavorites = favorites.filter(id => id !== stationUuid);
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+      emitFavoritesUpdated();
     } catch (error) {
       console.error('Error removing local favorite:', error);
     }
   }
-  
-  // Émettre un événement pour notifier les composants du changement
-  emitFavoritesUpdated();
 }
 
 // Fonction pour vérifier si une station est un favori

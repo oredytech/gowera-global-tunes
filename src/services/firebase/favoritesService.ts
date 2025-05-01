@@ -4,9 +4,14 @@ import { db } from "./config";
 import { getAuth } from "firebase/auth";
 import { toast } from "sonner";
 
-// Nouvelle fonction pour sauvegarder les favoris d'un utilisateur dans Firestore
+// Fonction pour sauvegarder les favoris d'un utilisateur dans Firestore
 export async function saveFavorite(userId: string, stationId: string): Promise<void> {
   try {
+    if (!userId) {
+      console.error("Aucun ID utilisateur fourni pour sauvegarder le favori");
+      return;
+    }
+    
     // Générer un ID unique basé sur l'ID station pour éviter les doublons
     const favoriteRef = doc(db, "favorites", `${userId}_${stationId}`);
     
