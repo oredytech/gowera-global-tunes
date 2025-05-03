@@ -69,6 +69,9 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
   try {
     console.log(`Fetching newly approved radios, limit: ${limitCount}`);
     
+    // Créer une requête pour les radios approuvées
+    // Cette requête nécessite un index composite sur "sponsored" et "createdAt"
+    console.log("Création de la requête pour les radios approuvées");
     const approvedRadiosQuery = query(
       collection(db, "radioSuggestions"),
       where("sponsored", "==", true),
@@ -76,11 +79,13 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
       limit(limitCount)
     );
     
+    console.log("Exécution de la requête...");
     const querySnapshot = await getDocs(approvedRadiosQuery);
     
     const approvedRadios: ApprovedRadio[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
+      console.log("Données de la radio récupérées:", doc.id, data);
       approvedRadios.push({
         id: doc.id,
         radioName: data.radioName,
@@ -99,6 +104,15 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
     return approvedRadios;
   } catch (error) {
     console.error("Error getting newly approved radios:", error);
+    // Afficher l'erreur complète pour récupérer le lien de création de l'index
+    if (error instanceof Error) {
+      console.error("Detailed error message:", error.message);
+      
+      // Si l'erreur contient un lien vers la création d'un index
+      if (error.message.includes('https://console.firebase.google.com')) {
+        console.error("Pour résoudre cette erreur, veuillez créer l'index en suivant ce lien dans le message d'erreur ci-dessus");
+      }
+    }
     throw error;
   }
 }
