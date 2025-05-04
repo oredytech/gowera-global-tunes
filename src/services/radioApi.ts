@@ -1,3 +1,4 @@
+
 import { getApprovedRadiosByCategory } from './firebase';
 import { ApprovedRadio } from './firebase/types';
 
@@ -27,6 +28,23 @@ export interface RadioStation {
   hls: number;
   lastchangetime: string;
   lastlocalchecktime: string;
+}
+
+// Define interfaces for countries, languages and tags
+export interface Country {
+  name: string;
+  iso_3166_1: string;
+  stationcount: number;
+}
+
+export interface Language {
+  name: string;
+  stationcount: number;
+}
+
+export interface Tag {
+  name: string;
+  stationcount: number;
 }
 
 // Helper function to map ApprovedRadio to RadioStation
@@ -68,6 +86,45 @@ export const getAllStations = async (limit: number = 100): Promise<RadioStation[
   }
 };
 
+// Function to get countries list
+export const getCountries = async (): Promise<Country[]> => {
+  try {
+    console.log('Getting countries list');
+    const response = await fetch(`${BASE_URL}/countries`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting countries:', error);
+    return [];
+  }
+};
+
+// Function to get languages list
+export const getLanguages = async (): Promise<Language[]> => {
+  try {
+    console.log('Getting languages list');
+    const response = await fetch(`${BASE_URL}/languages`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting languages:', error);
+    return [];
+  }
+};
+
+// Function to get tags/genres list
+export const getTags = async (): Promise<Tag[]> => {
+  try {
+    console.log('Getting tags/genres list');
+    const response = await fetch(`${BASE_URL}/tags`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting tags:', error);
+    return [];
+  }
+};
+
 // Function to get a list of popular stations
 export const getPopularStations = async (limit: number = 100): Promise<RadioStation[]> => {
   try {
@@ -96,7 +153,7 @@ export const getTrendingStations = async (limit: number = 100): Promise<RadioSta
 export const getStationsByCountry = async (country: string, limit: number = 60): Promise<RadioStation[]> => {
   try {
     console.log(`Getting stations by country: ${country}`);
-    const searchEndpoint = `${BASE_URL}/stations/bycountrycodeexact/${country}?limit=${limit}&hidebroken=true`;
+    const searchEndpoint = `${BASE_URL}/stations/bycountryexact/${country}?limit=${limit}&hidebroken=true`;
     const response = await fetch(searchEndpoint);
     const data = await response.json();
     
