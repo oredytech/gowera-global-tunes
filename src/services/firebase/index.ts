@@ -1,6 +1,6 @@
 
 // Export all Firebase services from this central file
-export { app, auth, db, storage, analytics } from './config';
+export { app, db, storage, analytics, auth } from './config';
 
 // Export radio suggestion services
 export {

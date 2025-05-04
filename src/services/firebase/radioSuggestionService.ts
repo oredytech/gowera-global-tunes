@@ -1,7 +1,8 @@
 
-import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, orderBy, limit, getDoc } from "firebase/firestore";
 import { db } from "./config";
 import { RadioSuggestion, ApprovedRadio } from "./types";
+import { normalizeSlug } from "../openGraphService";
 
 // Fonction pour enregistrer une suggestion de radio
 export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "createdAt" | "sponsored">): Promise<string> {
@@ -35,6 +36,45 @@ export async function saveRadioSuggestion(suggestion: Omit<RadioSuggestion, "cre
   }
 }
 
+// Fonction pour récupérer les suggestions de radio en attente
+export async function getPendingRadioSuggestions(): Promise<RadioSuggestion[]> {
+  try {
+    const pendingRadiosQuery = query(
+      collection(db, "radioSuggestions"),
+      where("sponsored", "==", false),
+      orderBy("createdAt", "desc")
+    );
+    
+    const querySnapshot = await getDocs(pendingRadiosQuery);
+    
+    const pendingRadios: RadioSuggestion[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      pendingRadios.push({
+        id: doc.id,
+        radioName: data.radioName,
+        streamUrl: data.streamUrl,
+        websiteUrl: data.websiteUrl || undefined,
+        logoUrl: data.logoUrl || undefined,
+        description: data.description,
+        contactEmail: data.contactEmail,
+        contactPhone: data.contactPhone,
+        senderEmail: data.senderEmail,
+        createdAt: data.createdAt.toDate(),
+        sponsored: data.sponsored,
+        country: data.country,
+        language: data.language,
+        tags: data.tags
+      });
+    });
+    
+    return pendingRadios;
+  } catch (error) {
+    console.error("Error getting pending radio suggestions:", error);
+    throw error;
+  }
+}
+
 // Fonction pour approuver une suggestion de radio
 export async function approveRadioSuggestion(suggestionId: string): Promise<void> {
   try {
@@ -49,6 +89,23 @@ export async function approveRadioSuggestion(suggestionId: string): Promise<void
     // avec plus de logique métier selon vos besoins
   } catch (error) {
     console.error("Error approving radio suggestion:", error);
+    throw error;
+  }
+}
+
+// Fonction pour rejeter une suggestion de radio
+export async function rejectRadioSuggestion(suggestionId: string): Promise<void> {
+  try {
+    // Pour l'instant, nous allons simplement supprimer le document
+    // Mais vous pourriez préférer mettre à jour un champ "rejected" à true
+    const suggestionRef = doc(db, "radioSuggestions", suggestionId);
+    await updateDoc(suggestionRef, {
+      rejected: true
+    });
+    
+    console.log(`Radio suggestion with ID ${suggestionId} has been rejected`);
+  } catch (error) {
+    console.error("Error rejecting radio suggestion:", error);
     throw error;
   }
 }
@@ -113,6 +170,95 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
         console.error("Pour résoudre cette erreur, veuillez créer l'index en suivant ce lien dans le message d'erreur ci-dessus");
       }
     }
+    throw error;
+  }
+}
+
+// Fonction pour récupérer une radio approuvée par son slug
+export async function getApprovedRadioBySlug(slug: string): Promise<ApprovedRadio | null> {
+  try {
+    console.log(`Looking for radio with slug: ${slug}`);
+    
+    // Récupérer toutes les radios approuvées (limité à 100 pour des raisons de performance)
+    const approvedRadiosQuery = query(
+      collection(db, "radioSuggestions"),
+      where("sponsored", "==", true),
+      limit(100)
+    );
+    
+    const querySnapshot = await getDocs(approvedRadiosQuery);
+    
+    // Parcourir les résultats pour trouver la radio avec le slug correspondant
+    let foundRadio: ApprovedRadio | null = null;
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const radioSlug = normalizeSlug(data.radioName);
+      
+      if (radioSlug === slug) {
+        foundRadio = {
+          id: doc.id,
+          radioName: data.radioName,
+          streamUrl: data.streamUrl,
+          websiteUrl: data.websiteUrl || undefined,
+          logoUrl: data.logoUrl || undefined,
+          description: data.description,
+          approvedAt: data.createdAt.toDate(),
+          country: data.country || '',
+          tags: data.tags || '',
+          language: data.language || ''
+        };
+      }
+    });
+    
+    console.log(foundRadio ? `Found radio with slug ${slug}` : `No radio found with slug ${slug}`);
+    return foundRadio;
+  } catch (error) {
+    console.error(`Error getting radio by slug ${slug}:`, error);
+    throw error;
+  }
+}
+
+// Fonction pour récupérer les radios approuvées par catégorie
+export async function getApprovedRadiosByCategory(category: string): Promise<ApprovedRadio[]> {
+  try {
+    console.log(`Fetching approved radios by category: ${category}`);
+    
+    // Récupérer toutes les radios approuvées
+    const approvedRadiosQuery = query(
+      collection(db, "radioSuggestions"),
+      where("sponsored", "==", true),
+      limit(100) // Limiter pour des raisons de performance
+    );
+    
+    const querySnapshot = await getDocs(approvedRadiosQuery);
+    
+    const approvedRadios: ApprovedRadio[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // Vérifier si la radio correspond à la catégorie recherchée
+      // Note: On suppose que les tags sont stockés sous forme de chaîne séparée par des virgules
+      if (data.tags && data.tags.toLowerCase().includes(category.toLowerCase())) {
+        approvedRadios.push({
+          id: doc.id,
+          radioName: data.radioName,
+          streamUrl: data.streamUrl,
+          websiteUrl: data.websiteUrl || undefined,
+          logoUrl: data.logoUrl || undefined,
+          description: data.description,
+          approvedAt: data.createdAt.toDate(),
+          country: data.country || '',
+          tags: data.tags || '',
+          language: data.language || ''
+        });
+      }
+    });
+    
+    console.log(`Found ${approvedRadios.length} radios in category ${category}`);
+    return approvedRadios;
+  } catch (error) {
+    console.error(`Error getting radios by category ${category}:`, error);
     throw error;
   }
 }
