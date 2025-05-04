@@ -1,9 +1,7 @@
+import { getApprovedRadiosByCategory } from './firebase';
+import { ApprovedRadio } from './firebase/types';
 
-import { toast } from "sonner";
-import { getApprovedRadiosByCategory } from "./firebase";
-import { ApprovedRadio } from "./firebase/types";
-
-const API_BASE_URL = "https://de1.api.radio-browser.info/json";
+const BASE_URL = 'https://de1.api.radio-browser.info/json';
 
 export interface RadioStation {
   changeuuid: string;
@@ -18,227 +16,246 @@ export interface RadioStation {
   countrycode: string;
   language: string;
   votes: number;
-  lastchangetime: string;
   codec: string;
   bitrate: number;
-  hls: number;
   lastcheckok: number;
   lastchecktime: string;
   lastcheckoktime: string;
-  lastlocalchecktime: string;
   clicktimestamp: string;
   clickcount: number;
   clicktrend: number;
+  hls: number;
+  lastchangetime: string;
+  lastlocalchecktime: string;
 }
 
-export interface Country {
-  name: string;
-  stationcount: number;
-}
+// Helper function to map ApprovedRadio to RadioStation
+const mapApprovedRadioToStation = (radio: ApprovedRadio): RadioStation => ({
+  changeuuid: radio.id,
+  stationuuid: radio.id,
+  name: radio.radioName,
+  url: radio.streamUrl,
+  url_resolved: radio.streamUrl,
+  homepage: radio.websiteUrl || '',
+  favicon: radio.logoUrl || '',
+  tags: radio.tags,
+  country: radio.country,
+  countrycode: '',
+  language: radio.language,
+  votes: 0,
+  codec: '',
+  bitrate: 0,
+  lastcheckok: 1,
+  lastchecktime: '',
+  lastcheckoktime: '',
+  clicktimestamp: '',
+  clickcount: 0,
+  clicktrend: 0,
+  hls: 0,
+  lastchangetime: '',
+  lastlocalchecktime: ''
+});
 
-export interface Language {
-  name: string;
-  stationcount: number;
-}
-
-export interface Tag {
-  name: string;
-  stationcount: number;
-}
-
-// Helper function to fetch from the API with error handling
-async function fetchFromApi<T>(endpoint: string): Promise<T> {
+// Function to get a list of all stations
+export const getAllStations = async (limit: number = 100): Promise<RadioStation[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/${endpoint}`);
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    
+    const response = await fetch(`${BASE_URL}/stations?limit=${limit}&hidebroken=true`);
     const data = await response.json();
-    return data as T;
+    return data;
   } catch (error) {
-    console.error("API Error:", error);
-    toast.error("Erreur lors de la récupération des données radio");
-    throw error;
+    console.error('Error getting all stations:', error);
+    return [];
   }
-}
-
-// Helper function to convert ApprovedRadio to RadioStation
-export const convertApprovedRadioToStation = (radio: ApprovedRadio): RadioStation => {
-  return {
-    changeuuid: radio.id,
-    stationuuid: radio.id,
-    name: radio.radioName,
-    url: radio.streamUrl,
-    url_resolved: radio.streamUrl,
-    favicon: radio.logoUrl || '',
-    homepage: radio.websiteUrl || '',
-    country: radio.country || '',
-    countrycode: '',
-    language: radio.language || '',
-    tags: radio.tags || '',
-    votes: 0,
-    codec: '',
-    bitrate: 0,
-    lastcheckok: 1,
-    lastchecktime: '',
-    lastcheckoktime: '',
-    clicktimestamp: '',
-    clickcount: 0,
-    clicktrend: 0,
-    hls: 0,
-    lastchangetime: '',
-    lastlocalchecktime: ''
-  };
 };
 
-// Get stations by search term
-export async function searchStations(term: string): Promise<RadioStation[]> {
-  if (!term) return [];
-  const apiResults = await fetchFromApi<RadioStation[]>(`stations/search?name=${encodeURIComponent(term)}&limit=30`);
-  
-  // Search in approved radios too
+// Function to get a list of popular stations
+export const getPopularStations = async (limit: number = 100): Promise<RadioStation[]> => {
   try {
-    const approvedRadios = await getApprovedRadiosByCategory('search', term);
-    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
-    
-    // Combine results, removing duplicates by name
-    const allStations = [...apiResults];
-    convertedApprovedRadios.forEach(approved => {
-      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
-        allStations.push(approved);
-      }
-    });
-    
-    return allStations;
+    const response = await fetch(`${BASE_URL}/stations/topvote?limit=${limit}&hidebroken=true`);
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error("Error fetching approved radios:", error);
-    return apiResults;
+    console.error('Error getting popular stations:', error);
+    return [];
   }
-}
+};
 
-// Get stations by country
-export async function getStationsByCountry(country: string): Promise<RadioStation[]> {
-  const apiResults = await fetchFromApi<RadioStation[]>(`stations/bycountry/${encodeURIComponent(country)}?limit=30`);
-  
-  // Get approved radios with matching country
+// Function to get a list of trending stations
+export const getTrendingStations = async (limit: number = 100): Promise<RadioStation[]> => {
   try {
-    const approvedRadios = await getApprovedRadiosByCategory('country', country);
-    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
-    
-    // Combine results, removing duplicates by name
-    const allStations = [...apiResults];
-    convertedApprovedRadios.forEach(approved => {
-      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
-        allStations.push(approved);
-      }
-    });
-    
-    return allStations;
+    const response = await fetch(`${BASE_URL}/stations/topclick?limit=${limit}&hidebroken=true`);
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error("Error fetching approved radios by country:", error);
-    return apiResults;
+    console.error('Error getting trending stations:', error);
+    return [];
   }
-}
+};
 
-// Get stations by language
-export async function getStationsByLanguage(language: string): Promise<RadioStation[]> {
-  const apiResults = await fetchFromApi<RadioStation[]>(`stations/bylanguage/${encodeURIComponent(language)}?limit=30`);
-  
-  // Get approved radios with matching language
+// Function to get a list of stations by country
+export const getStationsByCountry = async (country: string, limit: number = 60): Promise<RadioStation[]> => {
   try {
-    const approvedRadios = await getApprovedRadiosByCategory('language', language);
-    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
+    console.log(`Getting stations by country: ${country}`);
+    const searchEndpoint = `${BASE_URL}/stations/bycountrycodeexact/${country}?limit=${limit}&hidebroken=true`;
+    const response = await fetch(searchEndpoint);
+    const data = await response.json();
     
-    // Combine results, removing duplicates by name
-    const allStations = [...apiResults];
-    convertedApprovedRadios.forEach(approved => {
-      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
-        allStations.push(approved);
-      }
-    });
-    
-    return allStations;
+    // Get approved radios by country from Firebase
+    try {
+      const approvedRadios = await getApprovedRadiosByCategory('country', country);
+      
+      // Map approved radios to RadioStation format
+      const mappedApprovedRadios = approvedRadios.map(radio => mapApprovedRadioToStation(radio));
+      
+      // Merge and return results
+      return [...data, ...mappedApprovedRadios];
+    } catch (error) {
+      console.error(`Error getting approved radios by country: ${country}`, error);
+      return data; // Return radio-browser.info results only
+    }
   } catch (error) {
-    console.error("Error fetching approved radios by language:", error);
-    return apiResults;
+    console.error(`Error getting stations by country: ${country}`, error);
+    return [];
   }
-}
+};
 
-// Get stations by tag (genre)
-export async function getStationsByTag(tag: string): Promise<RadioStation[]> {
-  const apiResults = await fetchFromApi<RadioStation[]>(`stations/bytag/${encodeURIComponent(tag)}?limit=30`);
-  
-  // Get approved radios with matching tag
+// Function to get a list of stations by language
+export const getStationsByLanguage = async (language: string, limit: number = 60): Promise<RadioStation[]> => {
   try {
-    const approvedRadios = await getApprovedRadiosByCategory('tag', tag);
-    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
+    console.log(`Getting stations by language: ${language}`);
+    const searchEndpoint = `${BASE_URL}/stations/bylanguageexact/${language}?limit=${limit}&hidebroken=true`;
+    const response = await fetch(searchEndpoint);
+    const data = await response.json();
     
-    // Combine results, removing duplicates by name
-    const allStations = [...apiResults];
-    convertedApprovedRadios.forEach(approved => {
-      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
-        allStations.push(approved);
-      }
-    });
-    
-    return allStations;
+    // Get approved radios by language from Firebase
+    try {
+      const approvedRadios = await getApprovedRadiosByCategory('language', language);
+      
+      // Map approved radios to RadioStation format
+      const mappedApprovedRadios = approvedRadios.map(radio => mapApprovedRadioToStation(radio));
+      
+      // Merge and return results
+      return [...data, ...mappedApprovedRadios];
+    } catch (error) {
+      console.error(`Error getting approved radios by language: ${language}`, error);
+      return data; // Return radio-browser.info results only
+    }
   } catch (error) {
-    console.error("Error fetching approved radios by tag:", error);
-    return apiResults;
+    console.error(`Error getting stations by language: ${language}`, error);
+    return [];
   }
-}
+};
 
-// Get popular stations
-export async function getPopularStations(): Promise<RadioStation[]> {
-  return fetchFromApi<RadioStation[]>('stations/topvote?limit=30');
-}
-
-// Get trending stations
-export async function getTrendingStations(): Promise<RadioStation[]> {
-  return fetchFromApi<RadioStation[]>('stations/topclick?limit=30');
-}
-
-// Get random stations
-export async function getRandomStations(limit: number = 10): Promise<RadioStation[]> {
-  return fetchFromApi<RadioStation[]>(`stations/search?order=random&limit=${limit}`);
-}
-
-// Get countries
-export async function getCountries(): Promise<Country[]> {
-  return fetchFromApi<Country[]>('countries');
-}
-
-// Get languages
-export async function getLanguages(): Promise<Language[]> {
-  return fetchFromApi<Language[]>('languages');
-}
-
-// Get tags/genres
-export async function getTags(): Promise<Tag[]> {
-  return fetchFromApi<Tag[]>('tags');
-}
-
-// Get station by UUID
-export async function getStationByUuid(uuid: string): Promise<RadioStation | null> {
-  if (!uuid) return null;
-  const stations = await fetchFromApi<RadioStation[]>(`stations/byuuid/${uuid}`);
-  return stations.length > 0 ? stations[0] : null;
-}
-
-// Get station by slug
-export async function getStationBySlug(searchTerm: string): Promise<RadioStation | null> {
-  if (!searchTerm) return null;
-  const stations = await fetchFromApi<RadioStation[]>(`stations/search?name=${encodeURIComponent(searchTerm)}&limit=1`);
-  return stations.length > 0 ? stations[0] : null;
-}
-
-// Click tracking
-export async function registerClick(stationUuid: string): Promise<void> {
+// Function to get a list of stations by tag
+export const getStationsByTag = async (tag: string, limit: number = 60): Promise<RadioStation[]> => {
   try {
-    await fetch(`${API_BASE_URL}/url/${stationUuid}`);
+    console.log(`Getting stations by tag: ${tag}`);
+    const searchEndpoint = `${BASE_URL}/stations/bytagexact/${tag}?limit=${limit}&hidebroken=true`;
+    const response = await fetch(searchEndpoint);
+    const data = await response.json();
+    
+    // Get approved radios by tag from Firebase
+    try {
+      const approvedRadios = await getApprovedRadiosByCategory('tag', tag);
+      
+      // Map approved radios to RadioStation format
+      const mappedApprovedRadios = approvedRadios.map(radio => mapApprovedRadioToStation(radio));
+      
+      // Merge and return results
+      return [...data, ...mappedApprovedRadios];
+    } catch (error) {
+      console.error(`Error getting approved radios by tag: ${tag}`, error);
+      return data; // Return radio-browser.info results only
+    }
   } catch (error) {
-    console.error("Failed to register click:", error);
+    console.error(`Error getting stations by tag: ${tag}`, error);
+    return [];
   }
-}
+};
+
+// Function to search stations by name
+export const searchStations = async (query: string, limit: number = 60): Promise<RadioStation[]> => {
+  try {
+    console.log(`Searching stations with query: ${query}`);
+    const searchEndpoint = `${BASE_URL}/stations/search?name=${encodeURIComponent(query)}&limit=${limit}&hidebroken=true`;
+    const response = await fetch(searchEndpoint);
+    const data = await response.json();
+    
+    // Get approved radios by search query from Firebase
+    try {
+      const approvedRadios = await getApprovedRadiosByCategory('search', query);
+      
+      // Map approved radios to RadioStation format
+      const mappedApprovedRadios = approvedRadios.map(radio => mapApprovedRadioToStation(radio));
+      
+      // Merge and return results
+      return [...data, ...mappedApprovedRadios];
+    } catch (error) {
+      console.error(`Error getting approved radios by search query: ${query}`, error);
+      return data; // Return radio-browser.info results only
+    }
+  } catch (error) {
+    console.error(`Error searching stations with query: ${query}`, error);
+    return [];
+  }
+};
+
+// Function to get a single station by UUID
+export const getStationByUuid = async (uuid: string): Promise<RadioStation | null> => {
+  try {
+    const response = await fetch(`${BASE_URL}/stations/byuuid/${uuid}`);
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      return data[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error getting station by UUID ${uuid}:`, error);
+    return null;
+  }
+};
+
+// Function to get a single station by slug
+export const getStationBySlug = async (slug: string): Promise<RadioStation | null> => {
+  try {
+    const allStations = await getAllStations(2000);
+    
+    if (!allStations || allStations.length === 0) {
+      console.warn('No stations found when searching by slug.');
+      return null;
+    }
+    
+    const normalizedSlug = (name: string) => {
+      return name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    };
+    
+    const foundStation = allStations.find(station => normalizedSlug(station.name) === slug);
+    
+    if (foundStation) {
+      return foundStation;
+    } else {
+      console.warn(`No station found with slug ${slug}.`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error getting station by slug ${slug}:`, error);
+    return null;
+  }
+};
+
+// Function to get a list of random stations
+export const getRandomStations = async (limit: number = 1): Promise<RadioStation[]> => {
+  try {
+    const response = await fetch(`${BASE_URL}/stations/search?limit=${limit}&hidebroken=true`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error getting random stations:', error);
+    return [];
+  }
+};

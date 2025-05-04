@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ApprovedRadio } from '../services/firebase/types';
 import { Heart, BadgePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import placeholderImage from '/placeholder.svg';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { normalizeSlug } from '../services/openGraphService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NewRadioCardProps {
   radio: ApprovedRadio;
@@ -17,7 +18,32 @@ interface NewRadioCardProps {
 
 export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
   const { playStation, currentStation, isPlaying } = useAudioPlayer();
-  const [favorite, setFavorite] = React.useState(false);
+  const [favorite, setFavorite] = useState(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const { currentUser } = useAuth();
+  
+  // Check if the radio is a favorite when the component loads
+  useEffect(() => {
+    const checkFavorite = async () => {
+      const isFav = await isFavorite(radio.id);
+      setFavorite(isFav);
+    };
+    
+    checkFavorite();
+  }, [radio.id]);
+
+  // Listen for favorites updated events
+  useEffect(() => {
+    const handleFavoritesUpdated = async () => {
+      const isFav = await isFavorite(radio.id);
+      setFavorite(isFav);
+    };
+    
+    window.addEventListener('favoritesUpdated', handleFavoritesUpdated);
+    return () => {
+      window.removeEventListener('favoritesUpdated', handleFavoritesUpdated);
+    };
+  }, [radio.id]);
   
   // Convert ApprovedRadio to format expected by AudioPlayer
   const handlePlay = (e: React.MouseEvent) => {
@@ -52,21 +78,33 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
     });
   };
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (favorite) {
-      // We don't have a station UUID for these radios, so we'll just use the ID
-      removeFavorite(radio.id);
-      toast.success(`${radio.radioName} retiré des favoris`);
-    } else {
-      // We don't have a station UUID for these radios, so we'll just use the ID
-      addFavorite(radio.id); 
-      toast.success(`${radio.radioName} ajouté aux favoris`);
-    }
+    if (isProcessing) return;
     
-    setFavorite(!favorite);
+    setIsProcessing(true);
+    
+    try {
+      console.log(`Clic sur favori pour ${radio.radioName} (${radio.id}). État actuel: ${favorite ? 'favori' : 'non favori'}`);
+      console.log(`Utilisateur connecté: ${currentUser ? currentUser.id : 'non connecté'}`);
+      
+      if (favorite) {
+        await removeFavorite(radio.id);
+        toast.success(`${radio.radioName} retiré des favoris`);
+      } else {
+        await addFavorite(radio.id);
+        toast.success(`${radio.radioName} ajouté aux favoris`);
+      }
+      
+      setFavorite(!favorite);
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+      toast.error('Une erreur est survenue');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const isCurrentlyPlaying = currentStation?.url_resolved === radio.streamUrl && isPlaying;
@@ -113,6 +151,7 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
             size="icon"
             className="absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40"
             onClick={handleFavoriteClick}
+            disabled={isProcessing}
           >
             <Heart 
               size={16} 

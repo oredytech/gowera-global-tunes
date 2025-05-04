@@ -7,6 +7,9 @@ import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from "sonner";
+import { getApprovedRadioBySlug } from '../services/firebase';
+import placeholderImage from '/placeholder.svg';
+import { normalizeSlug } from '../services/openGraphService';
 
 const FavoritesPage = () => {
   const [favoriteStations, setFavoriteStations] = useState<RadioStation[]>([]);
@@ -55,18 +58,58 @@ const FavoritesPage = () => {
       
       try {
         console.log(`Récupération de ${favoriteIds.length} stations favorites`);
-        // Récupérer toutes les stations en parallèle
-        const stationPromises = favoriteIds.map(id => getStationByUuid(id));
-        const results = await Promise.allSettled(stationPromises);
         
-        // Filtrer les résultats réussis
-        const successfulResults = results
-          .filter(result => result.status === 'fulfilled')
-          .map(result => (result as PromiseFulfilledResult<RadioStation | null>).value)
-          .filter(station => station !== null) as RadioStation[];
+        // Pour chaque ID favori, essayer de récupérer depuis radio-browser.info ou depuis Firebase
+        const allStations: RadioStation[] = [];
+        
+        for (const id of favoriteIds) {
+          try {
+            // D'abord essayer de récupérer depuis radio-browser.info
+            const station = await getStationByUuid(id);
+            if (station) {
+              allStations.push(station);
+              continue;
+            }
+            
+            // Si ça ne marche pas, essayer de récupérer depuis Firebase
+            // Les radios approuvées dans Firebase peuvent avoir été mises en favoris
+            // On va essayer de récupérer toutes les radios approuvées et filtrer par ID
+            const allApprovedRadios = await getApprovedRadioBySlug(id);
+            if (allApprovedRadios) {
+              // Convertir la radio approuvée en format RadioStation pour l'affichage
+              allStations.push({
+                changeuuid: allApprovedRadios.id,
+                stationuuid: allApprovedRadios.id,
+                name: allApprovedRadios.radioName,
+                url: allApprovedRadios.streamUrl,
+                url_resolved: allApprovedRadios.streamUrl,
+                favicon: allApprovedRadios.logoUrl || placeholderImage,
+                homepage: allApprovedRadios.websiteUrl || '',
+                country: allApprovedRadios.country || '',
+                countrycode: '',
+                language: allApprovedRadios.language || '',
+                tags: allApprovedRadios.tags || '',
+                votes: 0,
+                codec: '',
+                bitrate: 0,
+                lastcheckok: 1,
+                lastchecktime: '',
+                lastcheckoktime: '',
+                clicktimestamp: '',
+                clickcount: 0,
+                clicktrend: 0,
+                hls: 0,
+                lastchangetime: '',
+                lastlocalchecktime: ''
+              });
+            }
+          } catch (error) {
+            console.error(`Erreur lors de la récupération de la station ${id}:`, error);
+          }
+        }
           
-        console.log(`${successfulResults.length} stations favorites récupérées avec succès`);
-        return successfulResults;
+        console.log(`${allStations.length} stations favorites récupérées avec succès`);
+        return allStations;
       } catch (error) {
         console.error("Erreur lors de la récupération des stations:", error);
         toast.error("Impossible de récupérer certaines stations. Veuillez réessayer plus tard.");
