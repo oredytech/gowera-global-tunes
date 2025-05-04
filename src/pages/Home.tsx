@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPopularStations, getTrendingStations, getRandomStations } from '../services/radioApi';
@@ -7,6 +6,8 @@ import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
 import { NewRadiosGrid } from '../components/NewRadiosGrid';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const audioPlayer = useAudioPlayer();
@@ -68,15 +69,23 @@ const Home = () => {
   };
 
   return <div className="space-y-10 mx-0">
-      {newRadios && newRadios.length > 0 && (
-        <section className="mx-0">
+      <section className="mx-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
           <SectionHeader 
             title="Nouvelles radios" 
             description="Les stations récemment ajoutées à GOWERA" 
           />
-          <NewRadiosGrid radios={newRadios} isLoading={loadingNewRadios} />
-        </section>
-      )}
+          <Button variant="outline" size="sm" asChild className="mt-2 sm:mt-0">
+            <Link to="/suggest-radio">Suggérer une radio</Link>
+          </Button>
+        </div>
+        <NewRadiosGrid 
+          radios={newRadios || []} 
+          isLoading={loadingNewRadios} 
+          error={newRadiosError}
+          emptyMessage="Aucune nouvelle radio n'a été ajoutée récemment. Soyez le premier à en suggérer une !"
+        />
+      </section>
       
       <section className="mx-0">
         <SectionHeader title="Tendances" description="Les stations les plus écoutées en ce moment" link="/popular" />

@@ -2,8 +2,9 @@
 import React from 'react';
 import { ApprovedRadio } from '../services/firebase';
 import { NewRadioCard } from './NewRadioCard';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface NewRadiosGridProps {
   radios: ApprovedRadio[];
@@ -31,14 +32,36 @@ export const NewRadiosGrid: React.FC<NewRadiosGridProps> = ({
     // Vérification si l'erreur est liée à un index Firebase manquant
     const errorMessage = error instanceof Error ? error.message : String(error);
     const isFirebaseIndexError = errorMessage.includes('requires an index');
+    const indexUrl = isFirebaseIndexError 
+      ? errorMessage.match(/https:\/\/console\.firebase\.google\.com[^\s"')]+/)?.[0] 
+      : null;
     
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {isFirebaseIndexError 
-            ? "Erreur de configuration Firebase: Un index est requis pour afficher les nouvelles radios. Veuillez consulter la console d'erreurs pour obtenir le lien de création de l'index." 
-            : "Impossible de charger les nouvelles radios. Veuillez réessayer plus tard."}
+        <AlertTitle>Erreur lors du chargement des nouvelles radios</AlertTitle>
+        <AlertDescription className="space-y-4">
+          <p>
+            {isFirebaseIndexError 
+              ? "Configuration Firebase: Un index est requis pour afficher les nouvelles radios." 
+              : "Impossible de charger les nouvelles radios. Veuillez réessayer plus tard."}
+          </p>
+          {indexUrl && (
+            <div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="mt-2"
+                onClick={() => window.open(indexUrl, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Créer l'index requis
+              </Button>
+              <p className="text-xs mt-2">
+                Après avoir créé l'index, veuillez rafraîchir la page pour voir les nouvelles radios.
+              </p>
+            </div>
+          )}
         </AlertDescription>
       </Alert>
     );
@@ -46,8 +69,11 @@ export const NewRadiosGrid: React.FC<NewRadiosGridProps> = ({
   
   if (radios.length === 0) {
     return (
-      <div className="flex justify-center items-center py-24 text-muted-foreground">
-        {emptyMessage}
+      <div className="flex flex-col justify-center items-center py-12 text-muted-foreground">
+        <p className="mb-4">{emptyMessage}</p>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/suggest-radio">Suggérer une radio</Link>
+        </Button>
       </div>
     );
   }
