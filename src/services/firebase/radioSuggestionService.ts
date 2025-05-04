@@ -1,4 +1,3 @@
-
 import { collection, addDoc, Timestamp, doc, updateDoc, query, where, getDocs, orderBy, limit, getDoc } from "firebase/firestore";
 import { db } from "./config";
 import { RadioSuggestion, ApprovedRadio } from "./types";
@@ -220,9 +219,9 @@ export async function getApprovedRadioBySlug(slug: string): Promise<ApprovedRadi
 }
 
 // Fonction pour récupérer les radios approuvées par catégorie
-export async function getApprovedRadiosByCategory(category: string): Promise<ApprovedRadio[]> {
+export async function getApprovedRadiosByCategory(categoryType: string, categoryValue: string): Promise<ApprovedRadio[]> {
   try {
-    console.log(`Fetching approved radios by category: ${category}`);
+    console.log(`Fetching approved radios by ${categoryType}: ${categoryValue}`);
     
     // Récupérer toutes les radios approuvées
     const approvedRadiosQuery = query(
@@ -237,9 +236,27 @@ export async function getApprovedRadiosByCategory(category: string): Promise<App
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       
-      // Vérifier si la radio correspond à la catégorie recherchée
-      // Note: On suppose que les tags sont stockés sous forme de chaîne séparée par des virgules
-      if (data.tags && data.tags.toLowerCase().includes(category.toLowerCase())) {
+      // Logic to filter radios based on category type and value
+      let includeRadio = false;
+      
+      switch(categoryType.toLowerCase()) {
+        case 'country':
+          includeRadio = data.country && data.country.toLowerCase() === categoryValue.toLowerCase();
+          break;
+        case 'language':
+          includeRadio = data.language && data.language.toLowerCase() === categoryValue.toLowerCase();
+          break;
+        case 'tag':
+          includeRadio = data.tags && data.tags.toLowerCase().includes(categoryValue.toLowerCase());
+          break;
+        case 'search':
+          includeRadio = data.radioName && data.radioName.toLowerCase().includes(categoryValue.toLowerCase());
+          break;
+        default:
+          includeRadio = false;
+      }
+      
+      if (includeRadio) {
         approvedRadios.push({
           id: doc.id,
           radioName: data.radioName,
@@ -255,10 +272,10 @@ export async function getApprovedRadiosByCategory(category: string): Promise<App
       }
     });
     
-    console.log(`Found ${approvedRadios.length} radios in category ${category}`);
+    console.log(`Found ${approvedRadios.length} radios matching ${categoryType}: ${categoryValue}`);
     return approvedRadios;
   } catch (error) {
-    console.error(`Error getting radios by category ${category}:`, error);
+    console.error(`Error getting radios by ${categoryType} ${categoryValue}:`, error);
     throw error;
   }
 }

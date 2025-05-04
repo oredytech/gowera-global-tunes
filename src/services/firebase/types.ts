@@ -3,6 +3,7 @@ import { Timestamp } from "firebase/firestore";
 
 // Interface pour les suggestions de radio
 export interface RadioSuggestion {
+  id?: string;  // Make id optional so it can be added after document creation
   radioName: string;
   streamUrl: string;
   websiteUrl?: string;
