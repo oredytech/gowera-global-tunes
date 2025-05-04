@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ApprovedRadio } from '../services/firebaseService';
+import { ApprovedRadio } from '../services/firebase/types';
 import { Heart, BadgePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
@@ -8,6 +8,8 @@ import { addFavorite, removeFavorite, isFavorite } from '../services/favoriteSer
 import { toast } from 'sonner';
 import placeholderImage from '/placeholder.svg';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
+import { normalizeSlug } from '../services/openGraphService';
 
 interface NewRadioCardProps {
   radio: ApprovedRadio;
@@ -18,7 +20,10 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
   const [favorite, setFavorite] = React.useState(false);
   
   // Convert ApprovedRadio to format expected by AudioPlayer
-  const handlePlay = () => {
+  const handlePlay = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Create a RadioStation object that the playStation function expects
     playStation({
       changeuuid: radio.id,
@@ -83,12 +88,15 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
       return `Il y a ${diffDays} jours`;
     }
   };
+  
+  // Create a normalized slug for the radio URL
+  const slug = normalizeSlug(radio.radioName);
 
   return (
     <div className={`block relative ${isCurrentlyPlaying ? 'border border-primary/50' : ''}`}>
-      <div 
-        onClick={handlePlay}
-        className="cursor-pointer"
+      <Link 
+        to={`/station/${slug}`}
+        className="block cursor-pointer"
       >
         <div className="relative">
           <img
@@ -138,7 +146,7 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
             {formatDateAgo(radio.approvedAt)}
           </span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };

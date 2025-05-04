@@ -1,12 +1,25 @@
 
-// Export des configurations
-export * from './config';
+// Export all Firebase services from this central file
+export { app, auth, db, storage, analytics } from './config';
 
-// Export des types
-export * from './types';
+// Export radio suggestion services
+export {
+  saveRadioSuggestion,
+  getPendingRadioSuggestions,
+  approveRadioSuggestion,
+  rejectRadioSuggestion,
+  updateSponsorStatus,
+  getNewlyApprovedRadios,
+  getApprovedRadioBySlug,
+  getApprovedRadiosByCategory
+} from './radioSuggestionService';
 
-// Export des services radio
-export * from './radioSuggestionService';
+// Export favorites services
+export {
+  saveFavorite,
+  getUserFavorites,
+  removeFavoriteFromDb
+} from './favoritesService';
 
-// Export des services favoris
-export * from './favoritesService';
+// Export types
+export type { RadioSuggestion, ApprovedRadio } from './types';

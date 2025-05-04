@@ -1,5 +1,7 @@
 
 import { toast } from "sonner";
+import { getApprovedRadiosByCategory } from "./firebase";
+import { ApprovedRadio } from "./firebase/types";
 
 const API_BASE_URL = "https://de1.api.radio-browser.info/json";
 
@@ -62,25 +64,130 @@ async function fetchFromApi<T>(endpoint: string): Promise<T> {
   }
 }
 
+// Helper function to convert ApprovedRadio to RadioStation
+export const convertApprovedRadioToStation = (radio: ApprovedRadio): RadioStation => {
+  return {
+    changeuuid: radio.id,
+    stationuuid: radio.id,
+    name: radio.radioName,
+    url: radio.streamUrl,
+    url_resolved: radio.streamUrl,
+    favicon: radio.logoUrl || '',
+    homepage: radio.websiteUrl || '',
+    country: radio.country || '',
+    countrycode: '',
+    language: radio.language || '',
+    tags: radio.tags || '',
+    votes: 0,
+    codec: '',
+    bitrate: 0,
+    lastcheckok: 1,
+    lastchecktime: '',
+    lastcheckoktime: '',
+    clicktimestamp: '',
+    clickcount: 0,
+    clicktrend: 0,
+    hls: 0,
+    lastchangetime: '',
+    lastlocalchecktime: ''
+  };
+};
+
 // Get stations by search term
 export async function searchStations(term: string): Promise<RadioStation[]> {
   if (!term) return [];
-  return fetchFromApi<RadioStation[]>(`stations/search?name=${encodeURIComponent(term)}&limit=30`);
+  const apiResults = await fetchFromApi<RadioStation[]>(`stations/search?name=${encodeURIComponent(term)}&limit=30`);
+  
+  // Search in approved radios too
+  try {
+    const approvedRadios = await getApprovedRadiosByCategory('search', term);
+    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
+    
+    // Combine results, removing duplicates by name
+    const allStations = [...apiResults];
+    convertedApprovedRadios.forEach(approved => {
+      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
+        allStations.push(approved);
+      }
+    });
+    
+    return allStations;
+  } catch (error) {
+    console.error("Error fetching approved radios:", error);
+    return apiResults;
+  }
 }
 
 // Get stations by country
 export async function getStationsByCountry(country: string): Promise<RadioStation[]> {
-  return fetchFromApi<RadioStation[]>(`stations/bycountry/${encodeURIComponent(country)}?limit=30`);
+  const apiResults = await fetchFromApi<RadioStation[]>(`stations/bycountry/${encodeURIComponent(country)}?limit=30`);
+  
+  // Get approved radios with matching country
+  try {
+    const approvedRadios = await getApprovedRadiosByCategory('country', country);
+    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
+    
+    // Combine results, removing duplicates by name
+    const allStations = [...apiResults];
+    convertedApprovedRadios.forEach(approved => {
+      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
+        allStations.push(approved);
+      }
+    });
+    
+    return allStations;
+  } catch (error) {
+    console.error("Error fetching approved radios by country:", error);
+    return apiResults;
+  }
 }
 
 // Get stations by language
 export async function getStationsByLanguage(language: string): Promise<RadioStation[]> {
-  return fetchFromApi<RadioStation[]>(`stations/bylanguage/${encodeURIComponent(language)}?limit=30`);
+  const apiResults = await fetchFromApi<RadioStation[]>(`stations/bylanguage/${encodeURIComponent(language)}?limit=30`);
+  
+  // Get approved radios with matching language
+  try {
+    const approvedRadios = await getApprovedRadiosByCategory('language', language);
+    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
+    
+    // Combine results, removing duplicates by name
+    const allStations = [...apiResults];
+    convertedApprovedRadios.forEach(approved => {
+      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
+        allStations.push(approved);
+      }
+    });
+    
+    return allStations;
+  } catch (error) {
+    console.error("Error fetching approved radios by language:", error);
+    return apiResults;
+  }
 }
 
 // Get stations by tag (genre)
 export async function getStationsByTag(tag: string): Promise<RadioStation[]> {
-  return fetchFromApi<RadioStation[]>(`stations/bytag/${encodeURIComponent(tag)}?limit=30`);
+  const apiResults = await fetchFromApi<RadioStation[]>(`stations/bytag/${encodeURIComponent(tag)}?limit=30`);
+  
+  // Get approved radios with matching tag
+  try {
+    const approvedRadios = await getApprovedRadiosByCategory('tag', tag);
+    const convertedApprovedRadios = approvedRadios.map(convertApprovedRadioToStation);
+    
+    // Combine results, removing duplicates by name
+    const allStations = [...apiResults];
+    convertedApprovedRadios.forEach(approved => {
+      if (!allStations.some(station => station.name.toLowerCase() === approved.name.toLowerCase())) {
+        allStations.push(approved);
+      }
+    });
+    
+    return allStations;
+  } catch (error) {
+    console.error("Error fetching approved radios by tag:", error);
+    return apiResults;
+  }
 }
 
 // Get popular stations
@@ -117,6 +224,13 @@ export async function getTags(): Promise<Tag[]> {
 export async function getStationByUuid(uuid: string): Promise<RadioStation | null> {
   if (!uuid) return null;
   const stations = await fetchFromApi<RadioStation[]>(`stations/byuuid/${uuid}`);
+  return stations.length > 0 ? stations[0] : null;
+}
+
+// Get station by slug
+export async function getStationBySlug(searchTerm: string): Promise<RadioStation | null> {
+  if (!searchTerm) return null;
+  const stations = await fetchFromApi<RadioStation[]>(`stations/search?name=${encodeURIComponent(searchTerm)}&limit=1`);
   return stations.length > 0 ? stations[0] : null;
 }
 

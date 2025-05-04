@@ -1,7 +1,9 @@
+
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { RadioStation } from '../services/radioApi';
+import { RadioStation, getStationBySlug } from '../services/radioApi';
+import { getApprovedRadioBySlug } from '../services/firebase';
 import { StationCard } from '../components/StationCard';
 import { SectionHeader } from '../components/SectionHeader';
 import { Loader2 } from 'lucide-react';
@@ -10,22 +12,68 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Helmet } from 'react-helmet-async';
 import { normalizeSlug } from '../services/openGraphService';
 import { ShareButtons } from '../components/ShareButtons';
+import placeholderImage from '/placeholder.svg';
 
 const StationDetailsPage = () => {
   const { slug } = useParams();
   const { playStation, currentStation } = useAudioPlayer();
   const isMobile = useIsMobile();
   
-  const { data: station, isLoading } = useQuery<RadioStation | null>({
+  // Query standard radio API
+  const { 
+    data: radioApiStation, 
+    isLoading: loadingRadioApi 
+  } = useQuery({
     queryKey: ['stations', 'search', slug],
     queryFn: async () => {
       const searchTerm = slug?.replace(/-/g, ' ');
-      const stations = await fetch(`https://de1.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(searchTerm || '')}&limit=1`)
-        .then(res => res.json());
-      return stations.length > 0 ? stations[0] : null;
+      return await getStationBySlug(searchTerm || '');
     },
     enabled: !!slug,
   });
+  
+  // Query custom approved radios
+  const {
+    data: approvedRadio,
+    isLoading: loadingApprovedRadio
+  } = useQuery({
+    queryKey: ['approvedRadios', slug],
+    queryFn: async () => {
+      if (!slug) return null;
+      return await getApprovedRadioBySlug(slug);
+    },
+    enabled: !!slug && !radioApiStation,
+  });
+
+  // Merge results - use approved radio if radio API doesn't have results
+  const isLoading = loadingRadioApi || loadingApprovedRadio;
+  
+  // Convert approved radio to station format if needed
+  const station = radioApiStation || (approvedRadio ? {
+    changeuuid: approvedRadio.id,
+    stationuuid: approvedRadio.id,
+    name: approvedRadio.radioName,
+    url: approvedRadio.streamUrl,
+    url_resolved: approvedRadio.streamUrl,
+    favicon: approvedRadio.logoUrl || placeholderImage,
+    homepage: approvedRadio.websiteUrl || '',
+    country: approvedRadio.country || '',
+    countrycode: '',
+    language: approvedRadio.language || '',
+    tags: approvedRadio.tags || '',
+    votes: 0,
+    codec: '',
+    bitrate: 0,
+    lastcheckok: 1,
+    lastchecktime: '',
+    lastcheckoktime: '',
+    clicktimestamp: '',
+    clickcount: 0,
+    clicktrend: 0,
+    hls: 0,
+    lastchangetime: '',
+    lastlocalchecktime: ''
+  } : null);
 
   useEffect(() => {
     if (station && (!currentStation || currentStation.stationuuid !== station.stationuuid)) {
