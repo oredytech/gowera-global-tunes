@@ -1,6 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getPopularStations, getTrendingStations, getRandomStations } from '../services/radioApi';
+import { getPopularStations, getTrendingStations, getRandomStations } from '../services/api';
 import { getNewlyApprovedRadios } from '../services/firebase';
 import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';

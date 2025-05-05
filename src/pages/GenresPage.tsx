@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTags, getStationsByTag, Tag } from '../services/radioApi';
+import { getTags, getStationsByTag, Tag } from '../services/api';
 import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
 import { Input } from '@/components/ui/input';

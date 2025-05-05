@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { RadioStation, getStationBySlug } from '../services/radioApi';
+import { RadioStation, getStationBySlug } from '../services/api';
 import { getApprovedRadioBySlug } from '../services/firebase';
 import { StationCard } from '../components/StationCard';
 import { SectionHeader } from '../components/SectionHeader';

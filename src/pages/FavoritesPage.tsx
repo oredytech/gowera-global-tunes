@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getFavorites } from '../services/favoriteService';
-import { getStationByUuid, RadioStation } from '../services/radioApi';
+import { getStationByUuid, RadioStation } from '../services/api';
 import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
 import { useAuth } from '../contexts/AuthContext';
