@@ -83,31 +83,52 @@ export const getStationByUuid = async (uuid: string): Promise<RadioStation | nul
   }
 };
 
+// Helper function to normalize slug for comparison
+const normalizeSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 // Function to get a single station by slug
 export const getStationBySlug = async (slug: string): Promise<RadioStation | null> => {
   try {
-    const allStations = await getAllStations(2000);
+    // First try to search by name that matches the slug
+    const searchQuery = slug.replace(/-/g, ' ');
+    console.log(`Searching for station with query: "${searchQuery}"`);
     
-    if (!allStations || allStations.length === 0) {
-      console.warn('No stations found when searching by slug.');
-      return null;
-    }
+    const searchResults = await searchStations(searchQuery, 50);
     
-    const normalizedSlug = (name: string) => {
-      return name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-    };
-    
-    const foundStation = allStations.find(station => normalizedSlug(station.name) === slug);
+    // Compare normalized slugs to find matching station
+    const foundStation = searchResults.find(station => 
+      normalizeSlug(station.name) === slug || 
+      normalizeSlug(station.name) === normalizeSlug(searchQuery)
+    );
     
     if (foundStation) {
+      console.log(`Found station by slug search: ${foundStation.name}`);
       return foundStation;
-    } else {
-      console.warn(`No station found with slug ${slug}.`);
-      return null;
     }
+    
+    // If not found through search, try getting all stations (more expensive operation)
+    if (!foundStation) {
+      console.log(`No station found by search, trying with all stations for slug: ${slug}`);
+      const allStations = await getAllStations(500);
+      
+      const stationByAllSearch = allStations.find(station => 
+        normalizeSlug(station.name) === slug || 
+        normalizeSlug(station.name) === normalizeSlug(searchQuery)
+      );
+      
+      if (stationByAllSearch) {
+        console.log(`Found station in all stations: ${stationByAllSearch.name}`);
+        return stationByAllSearch;
+      }
+    }
+    
+    console.warn(`No station found with slug ${slug}.`);
+    return null;
   } catch (error) {
     console.error(`Error getting station by slug ${slug}:`, error);
     return null;

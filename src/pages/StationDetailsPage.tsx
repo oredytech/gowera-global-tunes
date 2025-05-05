@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { RadioStation, getStationBySlug } from '../services/api';
+import { RadioStation, getStationBySlug, searchStations } from '../services/api';
 import { getApprovedRadioBySlug } from '../services/firebase';
 import { StationCard } from '../components/StationCard';
 import { SectionHeader } from '../components/SectionHeader';
@@ -19,17 +19,36 @@ const StationDetailsPage = () => {
   const { playStation, currentStation } = useAudioPlayer();
   const isMobile = useIsMobile();
   
-  // Query standard radio API
+  // Query standard radio API - first try exact slug match
   const { 
     data: radioApiStation, 
-    isLoading: loadingRadioApi 
+    isLoading: loadingRadioApi,
+    error: radioApiError
   } = useQuery({
-    queryKey: ['stations', 'search', slug],
+    queryKey: ['station', slug],
     queryFn: async () => {
-      const searchTerm = slug?.replace(/-/g, ' ');
-      return await getStationBySlug(searchTerm || '');
+      if (!slug) return null;
+      console.log(`Fetching station with slug: ${slug}`);
+      return await getStationBySlug(slug);
     },
     enabled: !!slug,
+    retry: 1
+  });
+  
+  // Fallback query - search by name if slug didn't work
+  const {
+    data: searchResults,
+    isLoading: loadingSearch,
+    error: searchError
+  } = useQuery({
+    queryKey: ['stations', 'search-fallback', slug],
+    queryFn: async () => {
+      if (!slug) return [];
+      const searchTerm = slug.replace(/-/g, ' ');
+      console.log(`Fallback search for: ${searchTerm}`);
+      return await searchStations(searchTerm, 5);
+    },
+    enabled: !!slug && !radioApiStation && !loadingRadioApi,
   });
   
   // Query custom approved radios
@@ -42,14 +61,17 @@ const StationDetailsPage = () => {
       if (!slug) return null;
       return await getApprovedRadioBySlug(slug);
     },
-    enabled: !!slug && !radioApiStation,
+    enabled: !!slug && !radioApiStation && !loadingRadioApi,
   });
 
   // Merge results - use approved radio if radio API doesn't have results
-  const isLoading = loadingRadioApi || loadingApprovedRadio;
+  const isLoading = loadingRadioApi || loadingApprovedRadio || loadingSearch;
+  
+  // Try to find station from search results if direct lookup failed
+  const fallbackStation = searchResults && searchResults.length > 0 ? searchResults[0] : null;
   
   // Convert approved radio to station format if needed
-  const station = radioApiStation || (approvedRadio ? {
+  const station = radioApiStation || fallbackStation || (approvedRadio ? {
     changeuuid: approvedRadio.id,
     stationuuid: approvedRadio.id,
     name: approvedRadio.radioName,
@@ -102,8 +124,11 @@ const StationDetailsPage = () => {
 
   if (!station) {
     return (
-      <div className="flex justify-center items-center py-24 text-muted-foreground">
-        Station non trouvée
+      <div className="flex flex-col justify-center items-center py-24 text-muted-foreground">
+        <p className="mb-2">Station non trouvée</p>
+        <p className="text-sm">
+          {slug && `Impossible de trouver une station correspondant à "${slug.replace(/-/g, ' ')}"`}
+        </p>
       </div>
     );
   }
