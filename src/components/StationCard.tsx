@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RadioStation } from '../services/radioApi';
+import { RadioStation } from '../services/api';
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';

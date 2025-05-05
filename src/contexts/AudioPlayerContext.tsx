@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
-import { RadioStation } from '../services/radioApi';
+import { RadioStation } from '../services/api';
 import { toast } from 'sonner';
 
 interface AudioPlayerContextProps {

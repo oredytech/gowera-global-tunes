@@ -1,5 +1,4 @@
-
-import { RadioStation } from './radioApi';
+import { RadioStation } from './api';
 
 /**
  * Génère un contenu HTML avec les métadonnées Open Graph pour une station de radio

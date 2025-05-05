@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RadioStation } from '../services/radioApi';
+import { RadioStation } from '../services/api';
 import { StationCard } from './StationCard';
 import { Loader2 } from 'lucide-react';
 

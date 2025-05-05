@@ -1,5 +1,5 @@
 
-import { RadioStation } from './radioApi';
+import { RadioStation } from './api';
 import { getUserFavorites, saveFavorite, removeFavoriteFromDb } from './firebase/favoritesService';
 import { getAuth } from 'firebase/auth';
 import { toast } from "sonner";
