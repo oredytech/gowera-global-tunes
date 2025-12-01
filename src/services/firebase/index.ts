@@ -21,5 +21,11 @@ export {
   removeFavoriteFromDb
 } from './favoritesService';
 
+// Export vote services
+export {
+  voteForRadio,
+  getRadioVotes
+} from './voteService';
+
 // Export types
 export type { RadioSuggestion, ApprovedRadio } from './types';

@@ -80,10 +80,21 @@ export const NewRadiosGrid: React.FC<NewRadiosGridProps> = ({
   }
   
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
-      {radios.map((radio) => (
-        <NewRadioCard key={radio.id} radio={radio} />
-      ))}
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
+        {radios.map((radio) => (
+          <NewRadioCard key={radio.id} radio={radio} />
+        ))}
+      </div>
+      {radios.length >= 6 && (
+        <div className="flex justify-center pt-2">
+          <Button asChild variant="outline">
+            <Link to="/new-radios">
+              Voir toutes les nouvelles radios
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

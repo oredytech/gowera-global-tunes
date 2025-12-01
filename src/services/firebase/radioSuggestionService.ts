@@ -131,6 +131,8 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
     const approvedRadiosQuery = query(
       collection(db, "radioSuggestions"),
       where("sponsored", "==", true),
+      orderBy("country", "asc"),
+      orderBy("votes", "desc"),
       orderBy("createdAt", "desc"),
       limit(limitCount)
     );
@@ -152,7 +154,8 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
         approvedAt: data.createdAt.toDate(),
         country: data.country || '',
         tags: data.tags || '',
-        language: data.language || ''
+        language: data.language || '',
+        votes: data.votes || 0
       });
     });
     
