@@ -31,4 +31,5 @@ export interface ApprovedRadio {
   country: string;
   tags: string;
   language: string;
+  votes?: number;
 }

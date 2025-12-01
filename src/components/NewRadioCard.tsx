@@ -1,10 +1,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { ApprovedRadio } from '../services/firebase/types';
-import { Heart, BadgePlus } from 'lucide-react';
+import { Heart, BadgePlus, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { addFavorite, removeFavorite, isFavorite } from '../services/favoriteService';
+import { voteForRadio } from '../services/firebase/voteService';
 import { toast } from 'sonner';
 import placeholderImage from '/placeholder.svg';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,8 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
   const { playStation, currentStation, isPlaying } = useAudioPlayer();
   const [favorite, setFavorite] = useState(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [votes, setVotes] = useState(radio.votes || 0);
+  const [isVoting, setIsVoting] = useState(false);
   const { currentUser } = useAuth();
   
   // Check if the radio is a favorite when the component loads
@@ -107,6 +110,26 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
     }
   };
 
+  const handleVote = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isVoting) return;
+    
+    setIsVoting(true);
+    
+    try {
+      const newVotes = await voteForRadio(radio.id);
+      setVotes(newVotes);
+      toast.success('Vote enregistré !');
+    } catch (error) {
+      console.error('Error voting:', error);
+      toast.error('Erreur lors du vote');
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
   const isCurrentlyPlaying = currentStation?.url_resolved === radio.streamUrl && isPlaying;
   const radioImage = radio.logoUrl && radio.logoUrl !== '' 
     ? radio.logoUrl 
@@ -180,10 +203,20 @@ export const NewRadioCard: React.FC<NewRadioCardProps> = ({ radio }) => {
         
         <h3 className="font-medium text-sm truncate">{radio.radioName}</h3>
         
-        <div className="flex items-center gap-1 mt-1">
+        <div className="flex items-center justify-between mt-1 gap-2">
           <span className="text-xs text-muted-foreground truncate">
             {formatDateAgo(radio.approvedAt)}
           </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 gap-1"
+            onClick={handleVote}
+            disabled={isVoting}
+          >
+            <ThumbsUp className="h-3 w-3" />
+            <span className="text-xs">{votes}</span>
+          </Button>
         </div>
       </Link>
     </div>

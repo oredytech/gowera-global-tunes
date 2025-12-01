@@ -27,6 +27,8 @@ import StationDetailsPage from "./pages/StationDetailsPage";
 import ArticleDetailPage from "./pages/ArticleDetailPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import InstallPWA from "./pages/InstallPWA";
+import AllNewRadios from "./pages/AllNewRadios";
 
 const App = () => {
   return (
@@ -53,6 +55,8 @@ const App = () => {
               <Route path="/advertising" element={<AdvertisingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/install" element={<InstallPWA />} />
+              <Route path="/new-radios" element={<AllNewRadios />} />
               
               <Route path="/station/:slug" element={<StationDetailsPage />} />
               <Route path="/article/:id" element={<ArticleDetailPage />} />
