@@ -8,7 +8,7 @@ import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 import { isFavorite, addFavorite, removeFavorite } from '../services/favoriteService';
 import { toast } from 'sonner';
 import placeholderImage from '/placeholder.svg';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/SupabaseAuthContext';
 
 interface StationCardProps {
   station: RadioStation;

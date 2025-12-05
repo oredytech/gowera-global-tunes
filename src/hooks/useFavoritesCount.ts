@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { getFavorites } from '../services/favoriteService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/SupabaseAuthContext';
 
 export const useFavoritesCount = () => {
   const [count, setCount] = useState(0);

@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import { Layout } from "./components/Layout";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/SupabaseAuthContext";
 import { AuthGuard } from "./components/auth/AuthGuard";
 
 import Home from "./pages/Home";

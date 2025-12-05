@@ -1,15 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getFavorites } from '../services/favoriteService';
 import { getStationByUuid, RadioStation } from '../services/api';
 import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/SupabaseAuthContext';
 import { toast } from "sonner";
-import { getApprovedRadioBySlug } from '../services/firebase';
+import { getApprovedRadioBySlug } from '../services/supabase';
 import placeholderImage from '/placeholder.svg';
-import { normalizeSlug } from '../services/openGraphService';
 
 const FavoritesPage = () => {
   const [favoriteStations, setFavoriteStations] = useState<RadioStation[]>([]);
@@ -59,7 +57,7 @@ const FavoritesPage = () => {
       try {
         console.log(`Récupération de ${favoriteIds.length} stations favorites`);
         
-        // Pour chaque ID favori, essayer de récupérer depuis radio-browser.info ou depuis Firebase
+        // Pour chaque ID favori, essayer de récupérer depuis radio-browser.info ou depuis Supabase
         const allStations: RadioStation[] = [];
         
         for (const id of favoriteIds) {
@@ -71,24 +69,23 @@ const FavoritesPage = () => {
               continue;
             }
             
-            // Si ça ne marche pas, essayer de récupérer depuis Firebase
-            // Les radios approuvées dans Firebase peuvent avoir été mises en favoris
-            // On va essayer de récupérer toutes les radios approuvées et filtrer par ID
-            const allApprovedRadios = await getApprovedRadioBySlug(id);
-            if (allApprovedRadios) {
+            // Si ça ne marche pas, essayer de récupérer depuis Supabase
+            const approvedRadio = await getApprovedRadioBySlug(id);
+            if (approvedRadio) {
+              const tagsString = Array.isArray(approvedRadio.tags) ? approvedRadio.tags.join(', ') : '';
               // Convertir la radio approuvée en format RadioStation pour l'affichage
               allStations.push({
-                changeuuid: allApprovedRadios.id,
-                stationuuid: allApprovedRadios.id,
-                name: allApprovedRadios.radioName,
-                url: allApprovedRadios.streamUrl,
-                url_resolved: allApprovedRadios.streamUrl,
-                favicon: allApprovedRadios.logoUrl || placeholderImage,
-                homepage: allApprovedRadios.websiteUrl || '',
-                country: allApprovedRadios.country || '',
+                changeuuid: approvedRadio.id,
+                stationuuid: approvedRadio.id,
+                name: approvedRadio.name,
+                url: approvedRadio.stream_url,
+                url_resolved: approvedRadio.stream_url,
+                favicon: approvedRadio.logo_url || placeholderImage,
+                homepage: approvedRadio.website || '',
+                country: approvedRadio.country || '',
                 countrycode: '',
-                language: allApprovedRadios.language || '',
-                tags: allApprovedRadios.tags || '',
+                language: approvedRadio.language || '',
+                tags: tagsString,
                 votes: 0,
                 codec: '',
                 bitrate: 0,

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getNewlyApprovedRadios } from '../services/firebase';
+import { getNewlyApprovedRadios } from '../services/supabase';
 import { NewRadiosGrid } from '@/components/NewRadiosGrid';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardContent } from '@/components/ui/card';
