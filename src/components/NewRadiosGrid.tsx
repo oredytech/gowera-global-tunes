@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ApprovedRadio } from '../services/firebase';
+import { ApprovedRadio } from '../services/supabase';
 import { NewRadioCard } from './NewRadioCard';
 import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -30,39 +30,12 @@ export const NewRadiosGrid: React.FC<NewRadiosGridProps> = ({
   }
   
   if (error) {
-    // Vérification si l'erreur est liée à un index Firebase manquant
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const isFirebaseIndexError = errorMessage.includes('requires an index');
-    const indexUrl = isFirebaseIndexError 
-      ? errorMessage.match(/https:\/\/console\.firebase\.google\.com[^\s"')]+/)?.[0] 
-      : null;
-    
     return (
       <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Erreur lors du chargement des nouvelles radios</AlertTitle>
-        <AlertDescription className="space-y-4">
-          <p>
-            {isFirebaseIndexError 
-              ? "Configuration Firebase: Un index est requis pour afficher les nouvelles radios." 
-              : "Impossible de charger les nouvelles radios. Veuillez réessayer plus tard."}
-          </p>
-          {indexUrl && (
-            <div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="mt-2"
-                onClick={() => window.open(indexUrl, '_blank')}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Créer l'index requis
-              </Button>
-              <p className="text-xs mt-2">
-                Après avoir créé l'index, veuillez rafraîchir la page pour voir les nouvelles radios.
-              </p>
-            </div>
-          )}
+        <AlertDescription>
+          <p>Impossible de charger les nouvelles radios. Veuillez réessayer plus tard.</p>
         </AlertDescription>
       </Alert>
     );

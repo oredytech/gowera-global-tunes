@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { db, approveRadioSuggestion } from "@/services/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { getPendingRadioSuggestions, approveRadioSuggestion } from "@/services/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { PendingRadiosList } from "@/components/pending-radios/PendingRadiosList";
 import { PendingRadiosHeader } from "@/components/pending-radios/PendingRadiosHeader";
@@ -18,7 +16,7 @@ interface PendingRadio {
   logoUrl?: string;
   contactEmail: string;
   contactPhone: string;
-  createdAt: any; // Firestore timestamp
+  createdAt: any;
 }
 
 const PendingRadiosPage = () => {
@@ -32,23 +30,22 @@ const PendingRadiosPage = () => {
     try {
       setLoading(true);
       
-      // Créer une requête pour obtenir toutes les radios où sponsored est false
-      const radioQuery = query(
-        collection(db, "radioSuggestions"),
-        where("sponsored", "==", false)
-      );
+      const radios = await getPendingRadioSuggestions();
       
-      const querySnapshot = await getDocs(radioQuery);
+      // Map Supabase fields to component fields
+      const mappedRadios: PendingRadio[] = radios.map(radio => ({
+        id: radio.id || '',
+        radioName: radio.name,
+        description: radio.description || '',
+        streamUrl: radio.stream_url,
+        websiteUrl: radio.website || undefined,
+        logoUrl: radio.logo_url || undefined,
+        contactEmail: radio.contact_email || '',
+        contactPhone: radio.contact_name || '',
+        createdAt: radio.created_at
+      }));
       
-      const radios: PendingRadio[] = [];
-      querySnapshot.forEach((doc) => {
-        radios.push({
-          id: doc.id,
-          ...doc.data()
-        } as PendingRadio);
-      });
-      
-      setPendingRadios(radios);
+      setPendingRadios(mappedRadios);
       setError(null);
     } catch (err) {
       console.error("Erreur lors de la récupération des radios en attente:", err);

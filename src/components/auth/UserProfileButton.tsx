@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/SupabaseAuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -39,7 +39,7 @@ export const UserProfileButton = () => {
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <User className="h-4 w-4" />
           <span className="hidden md:inline max-w-[100px] truncate">
-            {currentUser?.displayName || currentUser?.email.split('@')[0]}
+            {currentUser?.user_metadata?.display_name || currentUser?.email?.split('@')[0]}
           </span>
         </Button>
       </DropdownMenuTrigger>

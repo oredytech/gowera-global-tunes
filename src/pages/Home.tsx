@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPopularStations, getTrendingStations, getRandomStations } from '../services/api';
-import { getNewlyApprovedRadios } from '../services/firebase';
+import { getNewlyApprovedRadios } from '../services/supabase';
 import { SectionHeader } from '../components/SectionHeader';
 import { StationGrid } from '../components/StationGrid';
 import { NewRadiosGrid } from '../components/NewRadiosGrid';
@@ -46,11 +46,6 @@ const Home = () => {
   useEffect(() => {
     if (newRadiosError) {
       console.error("Erreur lors du chargement des nouvelles radios:", newRadiosError);
-      
-      // Si l'erreur contient un lien vers la création d'un index Firebase
-      if (newRadiosError instanceof Error && newRadiosError.message.includes('https://console.firebase.google.com')) {
-        console.error("Pour résoudre cette erreur, veuillez créer l'index en suivant ce lien dans le message d'erreur ci-dessus");
-      }
     }
   }, [newRadiosError]);
 

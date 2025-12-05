@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { RadioSuggestion, saveRadioSuggestion } from "@/services/firebase";
+import { saveRadioSuggestion } from "@/services/supabase";
 import { toast } from "@/hooks/use-toast";
 import { formSchema, SuggestRadioFormValues } from "./RadioFormSchema";
 import { RadioInfoSection } from "./RadioInfoSection";
@@ -41,25 +41,20 @@ export function SuggestRadioForm({ onSubmitSuccess, onSubmitError }: SuggestRadi
     try {
       setIsSubmitting(true);
       
-      // Prepare data for Firebase
-      const suggestionData: Omit<RadioSuggestion, "createdAt" | "sponsored"> = {
+      // Save suggestion to Supabase
+      const docId = await saveRadioSuggestion({
         radioName: values.radioName,
         streamUrl: values.streamUrl,
+        websiteUrl: values.websiteUrl,
+        logoUrl: values.logoUrl,
         description: values.description,
         contactEmail: values.contactEmail,
         contactPhone: values.contactPhone,
         senderEmail: values.senderEmail,
-        // Optional fields
-        websiteUrl: values.websiteUrl || undefined,
-        logoUrl: values.logoUrl || undefined,
-        // Required classification fields
         country: values.country,
         tags: values.tags,
-        language: values.language
-      };
-      
-      // Save suggestion to Firebase
-      const docId = await saveRadioSuggestion(suggestionData);
+        language: values.language,
+      });
       
       // Call the success callback with the form values and submission ID
       onSubmitSuccess(values, docId);
