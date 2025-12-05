@@ -125,16 +125,10 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
   try {
     console.log(`Fetching newly approved radios, limit: ${limitCount}`);
     
-    // Créer une requête pour les radios approuvées
-    // Cette requête nécessite un index composite sur "sponsored" et "createdAt"
-    console.log("Création de la requête pour les radios approuvées");
+    // Requête simplifiée - un seul filtre, tri côté client
     const approvedRadiosQuery = query(
       collection(db, "radioSuggestions"),
-      where("sponsored", "==", true),
-      orderBy("country", "asc"),
-      orderBy("votes", "desc"),
-      orderBy("createdAt", "desc"),
-      limit(limitCount)
+      where("sponsored", "==", true)
     );
     
     console.log("Exécution de la requête...");
@@ -143,7 +137,6 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
     const approvedRadios: ApprovedRadio[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      console.log("Données de la radio récupérées:", doc.id, data);
       approvedRadios.push({
         id: doc.id,
         radioName: data.radioName,
@@ -151,7 +144,7 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
         websiteUrl: data.websiteUrl || undefined,
         logoUrl: data.logoUrl || undefined,
         description: data.description,
-        approvedAt: data.createdAt.toDate(),
+        approvedAt: data.createdAt?.toDate() || new Date(),
         country: data.country || '',
         tags: data.tags || '',
         language: data.language || '',
@@ -159,19 +152,20 @@ export async function getNewlyApprovedRadios(limitCount: number = 6): Promise<Ap
       });
     });
     
-    console.log(`Found ${approvedRadios.length} newly approved radios`);
-    return approvedRadios;
+    // Tri côté client: par votes (desc), puis par date (desc)
+    approvedRadios.sort((a, b) => {
+      const voteDiff = (b.votes || 0) - (a.votes || 0);
+      if (voteDiff !== 0) return voteDiff;
+      return b.approvedAt.getTime() - a.approvedAt.getTime();
+    });
+    
+    // Limiter les résultats
+    const limitedRadios = approvedRadios.slice(0, limitCount);
+    
+    console.log(`Found ${limitedRadios.length} newly approved radios`);
+    return limitedRadios;
   } catch (error) {
     console.error("Error getting newly approved radios:", error);
-    // Afficher l'erreur complète pour récupérer le lien de création de l'index
-    if (error instanceof Error) {
-      console.error("Detailed error message:", error.message);
-      
-      // Si l'erreur contient un lien vers la création d'un index
-      if (error.message.includes('https://console.firebase.google.com')) {
-        console.error("Pour résoudre cette erreur, veuillez créer l'index en suivant ce lien dans le message d'erreur ci-dessus");
-      }
-    }
     throw error;
   }
 }
