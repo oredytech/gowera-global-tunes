@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { RadioStation, getStationBySlug, searchStations } from '../services/api';
-import { getApprovedRadioBySlug } from '../services/firebase';
+import { getApprovedRadioBySlug } from '../services/supabase';
 import { StationCard } from '../components/StationCard';
 import { SectionHeader } from '../components/SectionHeader';
 import { Loader2 } from 'lucide-react';
@@ -12,6 +12,9 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Helmet } from 'react-helmet-async';
 import { normalizeSlug } from '../services/openGraphService';
 import { ShareButtons } from '../components/ShareButtons';
+import { RadioReactions } from '../components/radio/RadioReactions';
+import { RadioComments } from '../components/radio/RadioComments';
+import { LiveComments } from '../components/radio/LiveComments';
 import placeholderImage from '/placeholder.svg';
 
 const StationDetailsPage = () => {
@@ -74,16 +77,16 @@ const StationDetailsPage = () => {
   const station = radioApiStation || fallbackStation || (approvedRadio ? {
     changeuuid: approvedRadio.id,
     stationuuid: approvedRadio.id,
-    name: approvedRadio.radioName,
-    url: approvedRadio.streamUrl,
-    url_resolved: approvedRadio.streamUrl,
-    favicon: approvedRadio.logoUrl || placeholderImage,
-    homepage: approvedRadio.websiteUrl || '',
+    name: approvedRadio.name,
+    url: approvedRadio.stream_url,
+    url_resolved: approvedRadio.stream_url,
+    favicon: approvedRadio.logo_url || placeholderImage,
+    homepage: approvedRadio.website || '',
     country: approvedRadio.country || '',
     countrycode: '',
     language: approvedRadio.language || '',
-    tags: approvedRadio.tags || '',
-    votes: 0,
+    tags: Array.isArray(approvedRadio.tags) ? approvedRadio.tags.join(', ') : (approvedRadio.tags || ''),
+    votes: approvedRadio.votes || 0,
     codec: '',
     bitrate: 0,
     lastcheckok: 1,
@@ -137,9 +140,13 @@ const StationDetailsPage = () => {
     ? station.favicon 
     : 'https://gowera.lovable.app/placeholder.svg';
   
-  const stationDescription = station.tags 
-    ? `${station.name} - ${station.country || 'Radio'} - ${station.tags.split(',').slice(0, 3).join(', ')}`
+  const tagsString = String(station.tags || '');
+  const stationDescription = tagsString 
+    ? `${station.name} - ${station.country || 'Radio'} - ${tagsString.split(',').slice(0, 3).join(', ')}`
     : `${station.name} - ${station.country || 'Radio'}`;
+
+  // Get the radio ID for interactions (works with approved radios)
+  const radioId = approvedRadio?.id || station?.stationuuid;
 
   return (
     <>
@@ -157,13 +164,17 @@ const StationDetailsPage = () => {
       <div className="space-y-6 md:space-y-8 w-full max-w-3xl mx-auto px-2 md:px-0">
         <SectionHeader 
           title={station.name}
-          description={`${station.country || 'Pays inconnu'} • ${station.tags?.split(',')[0] || 'Radio'}`}
+          description={`${station.country || 'Pays inconnu'} • ${tagsString.split(',')[0] || 'Radio'}`}
           className="break-words"
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           <div className="w-full space-y-4">
             <StationCard station={station} />
+            
+            {/* Reactions - J'aime / Je n'aime pas */}
+            {radioId && <RadioReactions radioId={radioId} />}
+            
             <ShareButtons 
               url={window.location.href}
               title={`Écoutez ${station.name} sur GOWERA`}
@@ -216,6 +227,20 @@ const StationDetailsPage = () => {
             )}
           </div>
         </div>
+
+        {/* Live Comments / Dédicaces */}
+        {radioId && (
+          <div className="mt-8">
+            <LiveComments radioId={radioId} />
+          </div>
+        )}
+
+        {/* Commentaires */}
+        {radioId && (
+          <div className="mt-8">
+            <RadioComments radioId={radioId} />
+          </div>
+        )}
       </div>
     </>
   );

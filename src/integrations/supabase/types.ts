@@ -35,6 +35,44 @@ export type Database = {
         }
         Relationships: []
       }
+      live_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          dedication_to: string | null
+          id: string
+          is_dedication: boolean | null
+          radio_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          dedication_to?: string | null
+          id?: string
+          is_dedication?: boolean | null
+          radio_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          dedication_to?: string | null
+          id?: string
+          is_dedication?: boolean | null
+          radio_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_comments_radio_id_fkey"
+            columns: ["radio_id"]
+            isOneToOne: false
+            referencedRelation: "radio_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -61,6 +99,73 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      radio_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          radio_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          radio_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          radio_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radio_comments_radio_id_fkey"
+            columns: ["radio_id"]
+            isOneToOne: false
+            referencedRelation: "radio_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      radio_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          radio_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          radio_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          radio_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radio_reactions_radio_id_fkey"
+            columns: ["radio_id"]
+            isOneToOne: false
+            referencedRelation: "radio_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       radio_suggestions: {
         Row: {

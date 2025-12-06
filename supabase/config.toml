@@ -1,1 +1,4 @@
 project_id = "mbkkmoxhiptzxtrvopej"
+
+[functions.notify-radio-submission]
+verify_jwt = false
