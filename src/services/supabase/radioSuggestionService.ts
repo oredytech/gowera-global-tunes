@@ -51,6 +51,10 @@ export async function saveRadioSuggestion(suggestion: {
 }): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser();
   
+  if (!user) {
+    throw new Error('Vous devez être connecté pour soumettre une radio');
+  }
+  
   // Convert tags string to array
   const tagsArray = suggestion.tags.split(',').map(tag => tag.trim()).filter(Boolean);
   
@@ -79,7 +83,7 @@ export async function saveRadioSuggestion(suggestion: {
       status: 'pending',
       slug: slug,
       votes: 0,
-      submitted_by: user?.id || null
+      submitted_by: user.id
     })
     .select('id')
     .single();
@@ -87,6 +91,24 @@ export async function saveRadioSuggestion(suggestion: {
   if (error) {
     console.error('Error saving radio suggestion:', error);
     throw error;
+  }
+
+  // Envoyer la notification par email
+  try {
+    await supabase.functions.invoke('notify-radio-submission', {
+      body: {
+        radioName: suggestion.radioName,
+        description: suggestion.description,
+        streamUrl: suggestion.streamUrl,
+        country: suggestion.country,
+        language: suggestion.language,
+        contactEmail: suggestion.contactEmail
+      }
+    });
+    console.log('Notification email sent');
+  } catch (emailError) {
+    console.error('Failed to send notification email:', emailError);
+    // On ne lance pas d'erreur ici car la radio a été enregistrée avec succès
   }
 
   console.log('Radio suggestion saved with ID:', data.id);
