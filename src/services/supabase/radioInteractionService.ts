@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface RadioReaction {
   id: string;
-  radio_id: string;
+  radio_id: string; // TEXT - peut être un UUID Supabase ou un stationuuid externe
   user_id: string;
   reaction_type: 'like' | 'dislike';
   created_at: string;
@@ -10,7 +10,7 @@ export interface RadioReaction {
 
 export interface RadioComment {
   id: string;
-  radio_id: string;
+  radio_id: string; // TEXT - peut être un UUID Supabase ou un stationuuid externe
   user_id: string;
   content: string;
   created_at: string;
@@ -21,7 +21,7 @@ export interface RadioComment {
 
 export interface LiveComment {
   id: string;
-  radio_id: string;
+  radio_id: string; // TEXT - peut être un UUID Supabase ou un stationuuid externe
   user_id: string;
   content: string;
   is_dedication: boolean;

@@ -63,15 +63,7 @@ export type Database = {
           radio_id?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "live_comments_radio_id_fkey"
-            columns: ["radio_id"]
-            isOneToOne: false
-            referencedRelation: "radio_suggestions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -125,15 +117,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "radio_comments_radio_id_fkey"
-            columns: ["radio_id"]
-            isOneToOne: false
-            referencedRelation: "radio_suggestions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       radio_reactions: {
         Row: {
@@ -157,15 +141,7 @@ export type Database = {
           reaction_type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "radio_reactions_radio_id_fkey"
-            columns: ["radio_id"]
-            isOneToOne: false
-            referencedRelation: "radio_suggestions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       radio_suggestions: {
         Row: {
