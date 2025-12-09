@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ShieldAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getPendingRadioSuggestions, approveRadioSuggestion } from "@/services/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { PendingRadiosList } from "@/components/pending-radios/PendingRadiosList";
 import { PendingRadiosHeader } from "@/components/pending-radios/PendingRadiosHeader";
 import { PendingRadiosInfo } from "@/components/pending-radios/PendingRadiosInfo";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useAuth } from "@/contexts/SupabaseAuthContext";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface PendingRadio {
   id: string;
@@ -20,6 +24,8 @@ interface PendingRadio {
 }
 
 const PendingRadiosPage = () => {
+  const { currentUser, loading: authLoading } = useAuth();
+  const { isAdmin, loading: adminLoading } = useIsAdmin();
   const [pendingRadios, setPendingRadios] = useState<PendingRadio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +62,10 @@ const PendingRadiosPage = () => {
   };
 
   useEffect(() => {
-    fetchPendingRadios();
-  }, []);
+    if (isAdmin) {
+      fetchPendingRadios();
+    }
+  }, [isAdmin]);
 
   const handleApprove = async (radio: PendingRadio) => {
     setApproving(true);
@@ -83,6 +91,53 @@ const PendingRadiosPage = () => {
       setApproving(false);
     }
   };
+
+  // Loading state
+  if (authLoading || adminLoading) {
+    return (
+      <div className="container max-w-4xl mx-auto px-4 flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Not logged in
+  if (!currentUser) {
+    return (
+      <div className="container max-w-4xl mx-auto px-4">
+        <PendingRadiosHeader />
+        <Alert variant="destructive" className="mb-6">
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Accès refusé</AlertTitle>
+          <AlertDescription>
+            Vous devez être connecté pour accéder à cette page.
+          </AlertDescription>
+        </Alert>
+        <Button asChild>
+          <Link to="/login">Se connecter</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // Not admin
+  if (!isAdmin) {
+    return (
+      <div className="container max-w-4xl mx-auto px-4">
+        <PendingRadiosHeader />
+        <Alert variant="destructive" className="mb-6">
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Accès refusé</AlertTitle>
+          <AlertDescription>
+            Seuls les administrateurs peuvent accéder à cette page.
+          </AlertDescription>
+        </Alert>
+        <Button asChild variant="outline">
+          <Link to="/">Retour à l'accueil</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-4xl mx-auto px-4">
